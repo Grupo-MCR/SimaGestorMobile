@@ -1,49 +1,48 @@
-class Despesas {
-  int id;
-  DateTime dataHora;
-  String tipoDespesa;
-  double valor;
-  String observacao;
-  bool recorrente;
+class Despesa {
+  int _id;
+  DateTime _dataHora;
+  String _tipoDespesa;
+  double _valor;
+  String _observacao;
+  bool _recorrente;
 
-  // Construtor
-  Despesas({
-    required this.id,
-    required this.dataHora,
-    required this.tipoDespesa,
-    required this.valor,
-    required this.observacao,
-    required this.recorrente,
-  });
+  Despesa({
+    required int id,
+    required DateTime dataHora,
+    required String tipoDespesa,
+    required double valor,
+    required String observacao,
+    required bool recorrente,
+  })  : _id = id,
+        _dataHora = dataHora,
+        _tipoDespesa = tipoDespesa,
+        _valor = valor,
+        _observacao = observacao,
+        _recorrente = recorrente;
 
-  // Métodos
-  void buscarDespesas() {
-    print("Buscando despesas...");
+  int get id => _id;
+  DateTime get dataHora => _dataHora;
+  String get tipoDespesa => _tipoDespesa;
+  double get valor => _valor;
+  String get observacao => _observacao;
+  bool get recorrente => _recorrente;
+
+  set dataHora(DateTime novaData) => _dataHora = novaData;
+  set tipoDespesa(String novoTipo) => _tipoDespesa = novoTipo;
+  set valor(double novoValor) {
+    if (novoValor >= 0) {
+      _valor = novoValor;
+    } else {
+      throw ArgumentError("O valor da despesa não pode ser negativo.");
+    }
   }
 
-  void editarDespesas({
-    DateTime? novaDataHora,
-    String? novoTipo,
-    double? novoValor,
-    String? novaObs,
-    bool? novoRecorrente,
-  }) {
-    if (novaDataHora != null) dataHora = novaDataHora;
-    if (novoTipo != null) tipoDespesa = novoTipo;
-    if (novoValor != null) valor = novoValor;
-    if (novaObs != null) observacao = novaObs;
-    if (novoRecorrente != null) recorrente = novoRecorrente;
-
-    print("Despesa $id editada com sucesso!");
-  }
-
-  void excluirDespesa() {
-    print("Despesa $id excluída!");
-  }
+  set observacao(String novaObs) => _observacao = novaObs;
+  set recorrente(bool novoRecorrente) => _recorrente = novoRecorrente;
 
   @override
   String toString() {
-    return 'Despesa{id: $id, dataHora: $dataHora, tipo: $tipoDespesa, '
-           'valor: $valor, obs: $observacao, recorrente: $recorrente}';
+    return 'Despesa{id: $_id, dataHora: $_dataHora, tipo: $_tipoDespesa, '
+        'valor: $_valor, obs: $_observacao, recorrente: $_recorrente}';
   }
 }
