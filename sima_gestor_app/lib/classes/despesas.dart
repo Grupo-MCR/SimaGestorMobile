@@ -1,5 +1,6 @@
 class Despesa {
   int _id;
+  String _placa;
   DateTime _dataHora;
   String _tipoDespesa;
   double _valor;
@@ -8,12 +9,14 @@ class Despesa {
 
   Despesa({
     required int id,
+    required String placa,
     required DateTime dataHora,
     required String tipoDespesa,
     required double valor,
     required String observacao,
     required bool recorrente,
   })  : _id = id,
+        _placa = placa,
         _dataHora = dataHora,
         _tipoDespesa = tipoDespesa,
         _valor = valor,
@@ -39,6 +42,17 @@ class Despesa {
 
   set observacao(String novaObs) => _observacao = novaObs;
   set recorrente(bool novoRecorrente) => _recorrente = novoRecorrente;
+
+  Map<String, dynamic> buildDespesa() {
+    Map<String, dynamic> despesa = {};
+      despesa["placa"] = _placa;
+      despesa["data_hora"] = _dataHora.toIso8601String();
+      despesa["tipo_despesa"] = _tipoDespesa;
+      despesa["valor"] = _valor;
+      despesa["observacao"] = _observacao;
+      despesa["recorrente"] = _recorrente?1:0;
+    return despesa;
+  }
 
   @override
   String toString() {
