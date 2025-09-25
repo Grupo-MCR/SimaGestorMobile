@@ -1,6 +1,3 @@
-import 'package:http/http.dart';
-import 'package:sima_gestor_app/classes/veiculo.dart';
-
 import 'item_checklist.dart';
 
 class CheckList {
