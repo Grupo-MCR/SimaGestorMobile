@@ -5,6 +5,10 @@ class Veiculo {
 
   Veiculo(this.id, this.placa, this.tipo);
 
+  factory Veiculo.fromJson(Map<String, dynamic> json) {
+    return Veiculo(json['id'], json['placa'], json['tipo']);
+  }
+
   bool validarNull() {
     if(id == null || placa == null || tipo == null) {
       return false;
