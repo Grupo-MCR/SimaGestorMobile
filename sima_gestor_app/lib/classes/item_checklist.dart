@@ -20,6 +20,38 @@ class ItemCheckList {
     );
   }
 
+  int? getId() {
+    return id;
+  }
+
+  void setId(int id) {
+    this.id = id;
+  }
+
+  String? getNome() {
+    return nome;
+  }
+
+  void setNome(String nome) {
+    this.nome = nome;
+  }
+
+  String? getComentario() {
+    return comentario;
+  }
+
+  void setComentario(String comentario) {
+    this.comentario = comentario;
+  }
+
+  File? getFoto() {
+    return foto;
+  }
+
+  void setFoto(File foto) {
+    this.foto = foto;
+  }
+
   bool validarNull() {
     // Valida se os campos obrigatórios são nulos
     if(id == null || nome == null) {
@@ -44,9 +76,14 @@ class ItemCheckList {
 
   // Retorna um Map para envio à API  
   Map<String, dynamic> buildItem() {
-    Map<String, String> item = {};
+    if(validarNull() == false) {
+      throw new ArgumentError.notNull("argumentos nulos");
+    }
+    Map<String, dynamic> item = {};
+    item['id'] = getId()??0;
     item['result'] = getStatus();
     item['comments'] = comentario??'';
+    item['photo'] = foto!.path;
     return item;
   }
 
