@@ -105,6 +105,21 @@ class Abastecimento {
     this.totalReais =  (valorLitro??1) * (litrosAbastecidos??1);
   }
 
+  Map<String, dynamic> buildAbastecimento() {
+    if(validarNull() == false) {
+      throw new ArgumentError.notNull("erro: informações incorretas");
+    }
+    Map<String, dynamic> abastecimento = {};
+    abastecimento["placa"] = placa;
+    abastecimento["data_hora"] = dataHora;
+    abastecimento["km"] = km;
+    abastecimento["combustivel"] = combustivel;
+    abastecimento["valor_por_litro"] = valorLitro;
+    abastecimento["litros_abastecidos"] = litrosAbastecidos;
+    abastecimento["total_reais"] = totalReais;
+    return abastecimento;
+  }
+
   @override
   String toString() {
     return "abastecimento = {id: $id, placa: $placa, dataHora: $dataHora, km: $km, combustivel: $combustivel, valorLitro: $valorLitro, litrosAbastecidos: $litrosAbastecidos, totalReais: $totalReais};";
