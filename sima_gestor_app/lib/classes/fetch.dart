@@ -17,6 +17,7 @@ class Fetch {
 
     var response = await client.get(fetchUrl, headers: fetchHeaders); // Execução da requisição
     if(response.statusCode != 200) {
+      print(response.statusCode);
       throw Exception('request failed :p'); // Lança erro se a requisição não for bem sucedida :P
     }
     return jsonDecode(response.body); // Retorno da resposta da requisição
@@ -30,6 +31,7 @@ class Fetch {
 
     var response = await client.post(fetchUrl, body: fetchBody, headers: fetchHeaders); // Execução da requisição
     if(response.statusCode != 200) {
+      print(response.statusCode);
       throw Exception('request failed :p'); // Lança erro se a requisição não for bem sucedida :P
     }
     return jsonDecode(response.body); // Retorno da resposta da requisição
