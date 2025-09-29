@@ -78,15 +78,34 @@ class APICall {
     }
   }
 
-  /*bool enviarAbastecimento(Map<String, dynamic> abasecimento) {
+  dynamic receberVeiculos() async {
     try {
+      String link = "https://" + getServer() + ".simagestor.com.br/api/api_veiculos.php";
+      Map<String, String> headers = {'Authorization': "Bearer " + getToken()};
 
+      dynamic responseVeiculos = await fetch.get(link, headers);
+      dynamic data = responseVeiculos['data'];
 
-
-
+      return data;
     } catch(e) {
       print(e.toString());
-      return false;
+      return null;
     }
-  }*/
+  }
+
+  dynamic enviarAbastecimento(Map<String, dynamic> abastecimento) async {
+    try {
+      String link = "https://" + getServer() + ".simagestor.com.br/api/api_abastecimento.php";
+      Map<String, String> headers = {'Authorization': "Bearer " + getToken()};      
+
+      dynamic responseAbastecimento = await fetch.post(link, headers, abastecimento);
+      print(responseAbastecimento);
+      dynamic message = responseAbastecimento['message'];
+      
+      return message;
+    } catch(e) {
+      print(e.toString());
+      return null;
+    }
+  }
 }
