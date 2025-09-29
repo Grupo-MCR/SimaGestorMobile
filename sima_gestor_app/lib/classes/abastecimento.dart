@@ -1,7 +1,7 @@
 class Abastecimento {
   int? id;
   String? placa;
-  String? dataHora;
+  DateTime? dataHora;
   double? km;
   String? combustivel;
   double? valorLitro;
@@ -9,7 +9,7 @@ class Abastecimento {
   double? totalReais;
 
   Abastecimento(String? placa,
-                  String? dataHora,
+                  DateTime? dataHora,
                   double? km,
                   String? combustivel,
                   double? valorLitro,
@@ -24,8 +24,7 @@ class Abastecimento {
   }
 
   bool validarNull() {
-    if(id == null ||
-        dataHora == null ||
+    if(dataHora == null ||
         km == null ||
         combustivel == null ||
         valorLitro == null ||
@@ -53,10 +52,11 @@ class Abastecimento {
   }
 
   String? getDataHora() {
-    return dataHora;
+    DateTime dataHoraAtual = dataHora??DateTime.now();
+    return dataHoraAtual.toIso8601String().substring(0, 17).replaceAll(RegExp(r'T'), ' ')+(dataHoraAtual.second.toString().length<2?'0'+dataHoraAtual.second.toString():dataHoraAtual.second.toString());
   }
 
-  void setDataHora(String dataHora) {
+  void setDataHora(DateTime dataHora) {
     this.dataHora = dataHora;
   }
 
@@ -111,7 +111,7 @@ class Abastecimento {
     }
     Map<String, dynamic> abastecimento = {};
     abastecimento["placa"] = placa;
-    abastecimento["data_hora"] = dataHora;
+    abastecimento["data_hora"] = getDataHora();
     abastecimento["km"] = km;
     abastecimento["combustivel"] = combustivel;
     abastecimento["valor_por_litro"] = valorLitro;
@@ -122,6 +122,6 @@ class Abastecimento {
 
   @override
   String toString() {
-    return "abastecimento = {id: $id, placa: $placa, dataHora: $dataHora, km: $km, combustivel: $combustivel, valorLitro: $valorLitro, litrosAbastecidos: $litrosAbastecidos, totalReais: $totalReais};";
+    return "abastecimento = {id: $id, placa: $placa, dataHora: ${getDataHora()}, km: $km, combustivel: $combustivel, valorLitro: $valorLitro, litrosAbastecidos: $litrosAbastecidos, totalReais: $totalReais};";
   }
 }
