@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'home.dart'; // importa a HomePage
+import 'home.dart';
+import '../service/login_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,26 +14,36 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _urlController = TextEditingController();
   final TextEditingController _senhaController = TextEditingController();
 
-  void _login() {
-    String email = _emailController.text.trim();
-    String senha = _senhaController.text.trim();
+  bool _loading = false;
 
-    if (email.isEmpty || senha.isEmpty) {
+  Future<void> _handleLogin() async {
+    setState(() => _loading = true);
+
+    try {
+      final logged = await LoginService.login(
+        _emailController.text.trim(),
+        _senhaController.text.trim(),
+        _urlController.text.trim(),
+      );
+
+      // se deu certo -> navega
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomePage(usuario: logged),
+        ),
+      );
+    } catch (e) {
+      // se deu erro -> mostra snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Preencha todos os campos!"),
+        SnackBar(
+          content: Text(e.toString()),
           backgroundColor: Colors.red,
         ),
       );
-      return;
+    } finally {
+      setState(() => _loading = false);
     }
-
-    // Aqui você faria a validação real com API
-    // Por enquanto só navega para a Home
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const HomePage()),
-    );
   }
 
   @override
@@ -44,7 +55,6 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Título
               const Text(
                 "SimaGestor",
                 style: TextStyle(
@@ -141,15 +151,19 @@ class _LoginPageState extends State<LoginPage> {
                             borderRadius: BorderRadius.circular(6),
                           ),
                         ),
-                        onPressed: _login,
-                        child: const Text(
-                          "Entrar",
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        onPressed: _loading ? null : _handleLogin,
+                        child: _loading
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
+                            : const Text(
+                                "Entrar",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                       ),
                     ],
                   ),
@@ -169,7 +183,7 @@ class _LoginPageState extends State<LoginPage> {
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),

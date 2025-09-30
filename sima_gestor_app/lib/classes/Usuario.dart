@@ -24,7 +24,9 @@ class Usuario {
     return Usuario(
       id: json['id'] as int?,
       nome: json['nome'] as String,
+      email: json['email'] as String?,
       servidor: json['servidor'] as String,
+      token: json['token'] as String?
     );
   }
 
