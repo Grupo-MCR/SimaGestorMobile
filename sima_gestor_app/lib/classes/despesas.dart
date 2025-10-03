@@ -1,5 +1,5 @@
 class Despesa {
-  int _id;
+  int? _id;
   String _placa;
   DateTime _dataHora;
   String _tipoDespesa;
@@ -8,7 +8,7 @@ class Despesa {
   bool _recorrente;
 
   Despesa({
-    required int id,
+    required int? id,
     required String placa,
     required DateTime dataHora,
     required String tipoDespesa,
@@ -23,8 +23,8 @@ class Despesa {
         _observacao = observacao,
         _recorrente = recorrente;
 
-  int get id => _id;
-  DateTime get dataHora => _dataHora;
+  int? get id => _id;
+  String get dataHora => _dataHora.toIso8601String().substring(0, 17).replaceAll(RegExp(r'T'), ' ')+(_dataHora.second.toString().length<2?'0'+_dataHora.second.toString():_dataHora.second.toString());
   String get tipoDespesa => _tipoDespesa;
   double get valor => _valor;
   String get observacao => _observacao;
@@ -46,7 +46,7 @@ class Despesa {
   Map<String, dynamic> buildDespesa() {
     Map<String, dynamic> despesa = {};
       despesa["placa"] = _placa;
-      despesa["data_hora"] = _dataHora.toIso8601String();
+      despesa["data_hora"] = dataHora;
       despesa["tipo_despesa"] = _tipoDespesa;
       despesa["valor"] = _valor;
       despesa["observacao"] = _observacao;
@@ -56,7 +56,7 @@ class Despesa {
 
   @override
   String toString() {
-    return 'Despesa{id: $_id, dataHora: $_dataHora, tipo: $_tipoDespesa, '
+    return 'Despesa{id: $_id, placa: $_placa, dataHora: $dataHora, tipo: $_tipoDespesa, '
         'valor: $_valor, obs: $_observacao, recorrente: $_recorrente}';
   }
 }
