@@ -28,6 +28,54 @@ class CheckList {
     return true;
   }
 
+  int? getId() {
+    return id;
+  }
+
+  void setId(int id) {
+    this.id = id;
+  } 
+
+  int? getIdVeiculo() {
+    return idVeiculo;
+  }
+
+  void setIdVeiculo(int idVeiculo) {
+    this.idVeiculo = idVeiculo;
+  }
+
+  int? getIdMotorista() {
+    return idMotorista;
+  }
+
+  void setIdMotoristas(int idMotorista) {
+    this.idMotorista = idMotorista;
+  }
+
+  String? getNomeVerificador() {
+    return nomeVerificador;
+  }
+
+  void setNomeVerificador(String nomeVerificador) {
+    this.nomeVerificador = nomeVerificador;
+  }
+
+  String? getAssinaturaBase64() {
+    return assinaturaBase64;
+  }
+
+  void setAssinaturaBase64(String assinaturaBase64) {
+    this.assinaturaBase64 = assinaturaBase64;
+  }
+
+  List<ItemCheckList> getItensChecklist() {
+    return itens;
+  }
+
+  void addItensChecklist(ItemCheckList item) {
+    itens.add(item);
+  }
+
   Map<String, dynamic> buildChecklist() {
     if(validarNull() == false) {
       throw new ArgumentError.notNull("argumentos nulos");
@@ -39,10 +87,10 @@ class CheckList {
     checklist['signature'] = assinaturaBase64;
     for(int i=0; i<itens.length; i++) {
       Map<String, dynamic> item = itens[i].buildItem();
-      checklist["items[" + item['id'] + "][result]"]= item['result'];
-      checklist["items[" + item['id'] + "][comments]"]= item['comments'];
+      checklist["items[" + item['id'].toString() + "][result]"]= item['result'];
+      checklist["items[" + item['id'].toString() + "][comments]"]= item['comments'];
       if(item['result'] ==  "not_ok") {
-        checklist["items[" + item['id'] + "][photo]"]= item['photo'];
+        checklist["items[" + item['id'].toString() + "][photo]"]= item['photo'];
       }
     }
     return checklist;

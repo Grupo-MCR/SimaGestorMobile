@@ -71,7 +71,7 @@ class ItemCheckList {
 
   // Metodo para definir resposta para API com base no status
   String getStatus() {
-    return status==false?"ok":"not_ok";
+    return status==true?"ok":"not_ok";
   }
 
   // Retorna um Map para envio à API  
@@ -83,7 +83,9 @@ class ItemCheckList {
     item['id'] = getId()??0;
     item['result'] = getStatus();
     item['comments'] = comentario??'';
-    item['photo'] = foto!.path;
+    if(getStatus() != "ok") {
+      item['photo'] = foto?.path??'';
+    }
     return item;
   }
 
