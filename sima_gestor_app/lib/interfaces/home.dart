@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../classes/usuario.dart';
+
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  final Usuario usuario;
+
+  const HomePage({super.key, required this.usuario});
 
   @override
   Widget build(BuildContext context) {
@@ -35,26 +39,42 @@ class HomePage extends StatelessWidget {
                     ),
                     onSelected: (value) {
                       if (value == 1) {
-                        // Ação sair
-                        Navigator.pop(context);
+                        Navigator.pop(context); // sair
                       }
                     },
                     itemBuilder: (context) => [
                       PopupMenuItem(
-                        enabled: false, // desabilita clique no nome
-                        child: Column(
-                          children: const [
-                            Icon(Icons.account_circle,
-                                color: Colors.white, size: 40),
-                            SizedBox(height: 5),
-                            Text(
-                              "Carlos",
-                              style: TextStyle(
+                        enabled: false,
+                        child: SizedBox(
+                          width: double.infinity, // força ocupar toda a largura
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center, // centraliza
+                            children: [
+                              const Icon(
+                                Icons.account_circle,
                                 color: Colors.white,
-                                fontWeight: FontWeight.bold,
+                                size: 40,
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 5),
+                              Text(
+                                usuario.getNome() ?? "Usuário",
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                usuario.getEmail() ?? "",
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       const PopupMenuDivider(),
