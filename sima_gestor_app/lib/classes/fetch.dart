@@ -4,7 +4,6 @@ import 'package:http_parser/http_parser.dart' as http_parser;
 
 // Classe para fazer as comunicações com a API
 class Fetch {
-
   // Atributo para fazer as transações com a API
   var client = http.Client();
 
@@ -26,7 +25,11 @@ class Fetch {
   }
 
   //Método para fazer um fetch no modo POST
-  Future<dynamic> post(String apiLink, Map<String, String> headers, dynamic body,) async {
+  Future<dynamic> post(
+    String apiLink,
+    Map<String, String> headers,
+    dynamic body,
+  ) async {
     var fetchUrl = Uri.parse(apiLink); // URL da API
     var fetchBody = json.encode(body); // Body da requisição
     var fetchHeaders = headers; // Headers da requisição
@@ -76,4 +79,3 @@ class Fetch {
   }
 
 }
-
