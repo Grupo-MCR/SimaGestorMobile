@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../classes/usuario.dart';
+import '../model/usuario.dart';
 
 class HomePage extends StatelessWidget {
   final Usuario usuario;

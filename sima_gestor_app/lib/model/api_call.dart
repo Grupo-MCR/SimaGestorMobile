@@ -1,7 +1,7 @@
 import 'package:http/http.dart';
-import 'package:sima_gestor_app/classes/item_checklist.dart';
-import 'package:sima_gestor_app/classes/usuario.dart';
-import 'package:sima_gestor_app/classes/veiculo.dart';
+import 'package:sima_gestor_app/model/item_checklist.dart';
+import 'package:sima_gestor_app/model/usuario.dart';
+import 'package:sima_gestor_app/model/veiculo.dart';
 import 'fetch.dart';
 
 class APICall {

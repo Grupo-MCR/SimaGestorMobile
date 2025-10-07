@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import '../classes/usuario.dart';
-import '../classes/abastecimento.dart';
-import '../classes/api_call.dart';
-import '../classes/despesas.dart';
-import '../classes/checklist.dart';
-import '../classes/item_checklist.dart';
+import '../model/usuario.dart';
+import '../model/abastecimento.dart';
+import '../model/api_call.dart';
+import '../model/despesas.dart';
+import '../model/checklist.dart';
+import '../model/item_checklist.dart';
 
 void main() async{
   Usuario user = Usuario(servidor: 'simasat');
