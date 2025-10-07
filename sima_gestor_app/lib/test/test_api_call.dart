@@ -30,7 +30,7 @@ void main() async{
     return;
   }
   print("\nlista de motoristas: ");
-  print(rm);
+  rm.forEach(print);
 
   dynamic rv = await api.receberVeiculos();
   if(rv == null) {
@@ -38,7 +38,7 @@ void main() async{
     return;
   }
   print("\nlista de veiculos: ");
-  print(rv);
+  rv.forEach(print);
 
   Abastecimento abastecimento = Abastecimento('SUS2O20', DateTime.now(), 333.33, 'Energia', 0.20, 5000);
   print(abastecimento);
@@ -58,15 +58,15 @@ void main() async{
   }
   print("\nDespesa:");
   print(rd);
-  /* OBS: teste burlado pq parece que o problema é na ponta do servidor do cara.
+  
   dynamic rtc = await api.receberItensChecklist(1);
   if(rtc == null) {
     print("test failed :c");
     return;
   }
   print("\ntemplates checklist: ");
-  print(rtc);
-  */
+  rtc.forEach(print);
+  
   File foto = File("C:\\Users\\connivia\\Downloads\\fp.png");
   ItemCheckList item1 = new ItemCheckList(id: 1, nome:'Verificar freios');
   item1.alterarStatus();
