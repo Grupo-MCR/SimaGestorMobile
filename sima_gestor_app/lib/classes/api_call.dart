@@ -143,18 +143,17 @@ class APICall {
   // Método para retornar uma lista com os itens de chelist do template do (id)véiculo passado
   dynamic receberItensChecklist(int idVeiculo) async {
     try {
-      String link = "https://" + getServer()+ ".simagestor.com.br/api_checklist.php/templates?vehicle_id=" + idVeiculo.toString();
+      String link = "https://" + getServer()+ ".simagestor.com.br/api/api_checklist.php/templates?vehicle_id=" + idVeiculo.toString();
       Map<String, String> headers = {'Authorization': "Bearer " + getToken()};
         
       dynamic responseItensChecklist = await fetch.get(link, headers);
-      List<Map<String, dynamic>> data = responseItensChecklist['data'];
+      List<dynamic> data = responseItensChecklist['data'];
       
       List<ItemCheckList> itens = [];
       data.forEach((item) {
         itens.add(ItemCheckList.fromJson(item));
       });
-      
-      print(itens);
+
       return itens;   
     } catch(e) {
       print(e.toString());
