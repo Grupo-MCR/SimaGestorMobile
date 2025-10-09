@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../classes/usuario.dart';
+import '../interfaces/abastecimento.dart';
+import '../interfaces/checklist.dart';
 
 class HomePage extends StatelessWidget {
   final Usuario usuario;
@@ -46,9 +48,9 @@ class HomePage extends StatelessWidget {
                       PopupMenuItem(
                         enabled: false,
                         child: SizedBox(
-                          width: double.infinity, // força ocupar toda a largura
+                          width: double.infinity,
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center, // centraliza
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               const Icon(
                                 Icons.account_circle,
@@ -97,20 +99,37 @@ class HomePage extends StatelessWidget {
                   children: [
                     _buildMenuCard(
                       title: "Abastecimentos",
-                      icon: Icons.build,
-                      onTap: () {},
+                      icon: Icons.local_gas_station,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                CadastroManualPage(usuario: usuario),
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 20),
                     _buildMenuCard(
                       title: "Despesas",
                       icon: Icons.attach_money,
-                      onTap: () {},
+                      onTap: () {
+                        // Ainda não implementado
+                      },
                     ),
                     const SizedBox(height: 20),
                     _buildMenuCard(
                       title: "Checklists",
                       icon: Icons.assignment,
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const CheckListPage(),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),

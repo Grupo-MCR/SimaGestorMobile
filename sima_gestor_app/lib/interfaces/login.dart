@@ -29,17 +29,12 @@ class _LoginPageState extends State<LoginPage> {
       // se deu certo -> navega
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (context) => HomePage(usuario: logged),
-        ),
+        MaterialPageRoute(builder: (context) => HomePage(usuario: logged)),
       );
     } catch (e) {
       // se deu erro -> mostra snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
       );
     } finally {
       setState(() => _loading = false);
