@@ -1,5 +1,5 @@
-import '../classes/usuario.dart';
-import '../classes/api_call.dart';
+import '../model/usuario.dart';
+import '../model/api_call.dart';
 
 class LoginService {
   static Future<Usuario> login(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:sima_gestor_app/classes/api_call.dart';
-import 'package:sima_gestor_app/classes/usuario.dart';
-import 'package:sima_gestor_app/classes/veiculo.dart';
+import 'package:sima_gestor_app/model/api_call.dart';
+import 'package:sima_gestor_app/model/usuario.dart';
+import 'package:sima_gestor_app/model/veiculo.dart';
 
 class CadastroManualPage extends StatefulWidget {
   final Usuario usuario;
