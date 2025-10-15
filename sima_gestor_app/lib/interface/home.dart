@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../model/usuario.dart';
+import '../interface/InterfaceDespesas.dart';
 
 class HomePage extends StatelessWidget {
   final Usuario usuario;
@@ -104,7 +105,15 @@ class HomePage extends StatelessWidget {
                     _buildMenuCard(
                       title: "Despesas",
                       icon: Icons.attach_money,
-                      onTap: () {},
+                      onTap: () {
+                        // Navega para a tela InterfaceDespesas
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const InterfaceDespesas(),
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 20),
                     _buildMenuCard(
