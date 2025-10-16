@@ -24,7 +24,8 @@ class Abastecimento {
   }
 
   bool validarNull() {
-    if(dataHora == null ||
+    if(placa == null || 
+        dataHora == null ||
         km == null ||
         combustivel == null ||
         valorLitro == null ||

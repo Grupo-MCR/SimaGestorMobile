@@ -118,8 +118,7 @@ class APICall {
     
       return responseAbastecimento['message'];
     } catch(e) {
-      print(e.toString());
-      return null;
+      throw new Exception(e.toString());
     }
   }
 
