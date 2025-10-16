@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:sima_gestor_app/model/abastecimento.dart';
 import 'package:sima_gestor_app/model/api_call.dart';
 import 'package:sima_gestor_app/model/usuario.dart';
 import 'package:sima_gestor_app/model/veiculo.dart';
+import 'package:sima_gestor_app/service/abastecimento_service.dart';
 
 class CadastroManualPage extends StatefulWidget {
   final Usuario usuario;
@@ -35,6 +37,55 @@ class _CadastroManualPageState extends State<CadastroManualPage> {
     litrosAbastecidosController.addListener(_calcularTotal);
   }
 
+  //  Função que converte os inputs e manda pro service mandar para a API
+  Future<void> mandarAbastecimento() async {
+    setState(() => _isLoading = true);
+
+    try {
+      //  Conversão da data pro formato ISO8601 para fazer o parse pra DateTime
+      String dataISO8601 = dataHoraController.text.trim().substring(6, 10) +
+                      '-' + dataHoraController.text.trim().substring(3, 5) +
+                      '-' + dataHoraController.text.trim().substring(0, 2) + 
+                      dataHoraController.text.trim().replaceAll(RegExp(r' '), 'T').replaceAll(RegExp(r'/'), '-').substring(10, 16);
+      
+      //  Declaração de um objeto 'Abastecimento' pra realizar o envio a API
+      Abastecimento abastecimento = new Abastecimento(
+        placaController.text.trim(), 
+        DateTime.tryParse(dataISO8601), 
+        double.tryParse(kmController.text.trim()), 
+        combustivelController.text.trim(), 
+        double.tryParse(valorPorLitroController.text.trim()), 
+        double.tryParse(litrosAbastecidosController.text.trim()));
+      
+      //  Tentativa de envio do abastecimento a API
+      String resposta = await AbastecimentoService.enviarAbastecimento(widget.usuario.getServidor(), widget.usuario.getToken()??'', abastecimento);
+      
+      dataHoraController.clear();
+      kmController.clear();
+      combustivelController.clear();
+      valorPorLitroController.clear();
+      litrosAbastecidosController.clear();
+
+      //  Popup inferior com mensagem de sucesso retornada da API
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(resposta),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      //  Popup inferior com mensagem de erro retornada da API
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceAll(RegExp('Exception: '), '')),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
   /// 🔹 Carrega as placas de veículos pela API
   void _loadPlacas(Usuario user) async {
     setState(() => _isLoading = true);
@@ -43,7 +94,6 @@ class _CadastroManualPageState extends State<CadastroManualPage> {
 
     try {
       var response = await api.receberVeiculos();
-      print("DEBUG >> retorno da API: $response");
 
       setState(() {
         _veiculos = response;
@@ -233,7 +283,7 @@ class _CadastroManualPageState extends State<CadastroManualPage> {
                   const SizedBox(height: 25),
 
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
@@ -243,39 +293,9 @@ class _CadastroManualPageState extends State<CadastroManualPage> {
                             vertical: 15,
                           ),
                         ),
-                        onPressed: () {
-                          print(placaController.text.trim());
-                          print(dataHoraController.text.trim());
-                          print(kmController.text.trim());
-                          print(combustivelController.text.trim());
-                          print(valorPorLitroController.text.trim());
-                          print(litrosAbastecidosController.text.trim());
-                          print(totalController.text.trim());
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Dados salvos com sucesso!'),
-                            ),
-                          );
-                        },
+                        onPressed: _isLoading ? null : mandarAbastecimento,
                         child: const Text(
                           'Salvar',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 30,
-                            vertical: 15,
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: const Text(
-                          'Voltar',
                           style: TextStyle(color: Colors.white),
                         ),
                       ),
