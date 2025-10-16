@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../model/usuario.dart';
+import '../interface/InterfaceDespesas.dart';
 import '../interface/abastecimento.dart';
 //import '../interfaces/checklist.dart';
 
@@ -115,7 +116,13 @@ class HomePage extends StatelessWidget {
                       title: "Despesas",
                       icon: Icons.attach_money,
                       onTap: () {
-                        // Ainda não implementado
+                        // Navega para a tela InterfaceDespesas
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const InterfaceDespesas(),
+                          ),
+                        );
                       },
                     ),
                     const SizedBox(height: 20),
