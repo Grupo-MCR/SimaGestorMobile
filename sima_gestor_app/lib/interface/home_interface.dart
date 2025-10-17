@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../model/usuario.dart';
-import '../interface/InterfaceDespesas.dart';
-import '../interface/abastecimento.dart';
+import 'despesa_interface.dart';
+import 'abastecimento_interface.dart';
 //import '../interfaces/checklist.dart';
 
 class HomePage extends StatelessWidget {
