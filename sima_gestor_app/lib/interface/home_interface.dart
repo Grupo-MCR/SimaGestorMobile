@@ -116,11 +116,14 @@ class HomePage extends StatelessWidget {
                       title: "Despesas",
                       icon: Icons.attach_money,
                       onTap: () {
-                        // Navega para a tela InterfaceDespesas
+                        // CORRIGIDO: Agora passa servidor e token
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const InterfaceDespesas(),
+                            builder: (context) => InterfaceDespesas(
+                              servidor: usuario.getServidor() ?? '',
+                              token: usuario.getToken() ?? '',
+                            ),
                           ),
                         );
                       },
