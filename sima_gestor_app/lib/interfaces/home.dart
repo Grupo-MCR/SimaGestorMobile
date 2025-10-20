@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../classes/usuario.dart';
+import '../interfaces/checklist.dart';
 
 class HomePage extends StatelessWidget {
   final Usuario usuario;
@@ -48,7 +49,8 @@ class HomePage extends StatelessWidget {
                         child: SizedBox(
                           width: double.infinity, // força ocupar toda a largura
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center, // centraliza
+                            crossAxisAlignment:
+                                CrossAxisAlignment.center, // centraliza
                             children: [
                               const Icon(
                                 Icons.account_circle,
@@ -110,7 +112,15 @@ class HomePage extends StatelessWidget {
                     _buildMenuCard(
                       title: "Checklists",
                       icon: Icons.assignment,
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                CheckListPage(usuario: usuario),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
