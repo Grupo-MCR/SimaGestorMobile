@@ -1,14 +1,12 @@
 import 'dart:io' show File;
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:signature/signature.dart';
-import 'package:sima_gestor_app/classes/api_call.dart';
-import 'package:sima_gestor_app/classes/item_checklist.dart';
-import 'package:sima_gestor_app/classes/usuario.dart';
-import 'package:sima_gestor_app/classes/veiculo.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:sima_gestor_app/model/api_call.dart';
+import 'package:sima_gestor_app/model/item_checklist.dart';
+import 'package:sima_gestor_app/model/usuario.dart';
+import 'package:sima_gestor_app/model/veiculo.dart';
 
 class CheckListPage extends StatefulWidget {
   final Usuario usuario;

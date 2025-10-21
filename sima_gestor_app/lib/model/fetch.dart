@@ -17,9 +17,9 @@ class Fetch {
 
     var response = await client.get(fetchUrl, headers: fetchHeaders); // Execução da requisição
     if(response.statusCode != 200) {
-      print(response.body);
-      print(response.statusCode);
-      throw Exception('request failed :p'); // Lança erro se a requisição não for bem sucedida :P
+      print("Código de status da resposta: " + response.statusCode.toString());
+      var error = jsonDecode(response.body);
+      throw Exception(error["message"]); // Lança erro se a requisição não for bem sucedida :P
     }
     return jsonDecode(response.body); // Retorno da resposta da requisição
   }
@@ -36,9 +36,9 @@ class Fetch {
 
     var response = await client.post(fetchUrl, body: fetchBody, headers: fetchHeaders); // Execução da requisição
     if(response.statusCode != 200) {
-      print(response.body);
-      print(response.statusCode);
-      throw Exception('request failed :p'); // Lança erro se a requisição não for bem sucedida :P
+      print("Código de status da resposta: " + response.statusCode.toString());
+      var error = jsonDecode(response.body);
+      throw Exception(error["message"]); // Lança erro se a requisição não for bem sucedida :P
     }
     return jsonDecode(response.body); // Retorno da resposta da requisição
   }
@@ -69,12 +69,11 @@ class Fetch {
     // bloco try realiza a requisição
     try {
       var response = await request.send(); // Manda a requisição
-      print(response.statusCode); // Faz um log do Status Code do retorno da requisição
+      print("Código de status da resposta: " + response.statusCode.toString());
       var body = await response.stream.bytesToString(); // Converte os bytes da resposta para uma string json
       return jsonDecode(body); // Retorna a resposta da requisição como um map
     } catch(e) {
-      print(e.toString()); // Faz um log do erro
-      throw Exception("request failed :p"); // Lança erro se a requisição não for bem sucedida :P
+      throw Exception(e.toString()); // Lança erro se a requisição não for bem sucedida :P
     }
   }
 

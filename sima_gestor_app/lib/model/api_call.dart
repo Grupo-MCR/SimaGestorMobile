@@ -1,7 +1,7 @@
 import 'package:http/http.dart';
-import 'package:sima_gestor_app/classes/item_checklist.dart';
-import 'package:sima_gestor_app/classes/usuario.dart';
-import 'package:sima_gestor_app/classes/veiculo.dart';
+import 'package:sima_gestor_app/model/item_checklist.dart';
+import 'package:sima_gestor_app/model/usuario.dart';
+import 'package:sima_gestor_app/model/veiculo.dart';
 import 'fetch.dart';
 
 class APICall {
@@ -118,8 +118,7 @@ class APICall {
     
       return responseAbastecimento['message'];
     } catch(e) {
-      print(e.toString());
-      return null;
+      throw new Exception(e.toString());
     }
   }
 
@@ -143,18 +142,17 @@ class APICall {
   // Método para retornar uma lista com os itens de chelist do template do (id)véiculo passado
   dynamic receberItensChecklist(int idVeiculo) async {
     try {
-      String link = "https://" + getServer()+ ".simagestor.com.br/api_checklist.php/templates?vehicle_id=" + idVeiculo.toString();
+      String link = "https://" + getServer()+ ".simagestor.com.br/api/api_checklist.php/templates?vehicle_id=" + idVeiculo.toString();
       Map<String, String> headers = {'Authorization': "Bearer " + getToken()};
         
       dynamic responseItensChecklist = await fetch.get(link, headers);
-      List<Map<String, dynamic>> data = responseItensChecklist['data'];
+      List<dynamic> data = responseItensChecklist['data'];
       
       List<ItemCheckList> itens = [];
       data.forEach((item) {
         itens.add(ItemCheckList.fromJson(item));
       });
-      
-      print(itens);
+
       return itens;   
     } catch(e) {
       print(e.toString());

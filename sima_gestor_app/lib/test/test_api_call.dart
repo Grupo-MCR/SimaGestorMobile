@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import '../classes/usuario.dart';
-import '../classes/abastecimento.dart';
-import '../classes/api_call.dart';
-import '../classes/despesas.dart';
-import '../classes/checklist.dart';
-import '../classes/item_checklist.dart';
+import '../model/usuario.dart';
+import '../model/abastecimento.dart';
+import '../model/api_call.dart';
+import '../model/despesas.dart';
+import '../model/checklist.dart';
+import '../model/item_checklist.dart';
 
 void main() async{
   Usuario user = Usuario(servidor: 'simasat');
@@ -30,7 +30,7 @@ void main() async{
     return;
   }
   print("\nlista de motoristas: ");
-  print(rm);
+  rm.forEach(print);
 
   dynamic rv = await api.receberVeiculos();
   if(rv == null) {
@@ -38,7 +38,7 @@ void main() async{
     return;
   }
   print("\nlista de veiculos: ");
-  print(rv);
+  rv.forEach(print);
 
   Abastecimento abastecimento = Abastecimento('SUS2O20', DateTime.now(), 333.33, 'Energia', 0.20, 5000);
   print(abastecimento);
@@ -58,15 +58,15 @@ void main() async{
   }
   print("\nDespesa:");
   print(rd);
-  /* OBS: teste burlado pq parece que o problema é na ponta do servidor do cara.
+  
   dynamic rtc = await api.receberItensChecklist(1);
   if(rtc == null) {
     print("test failed :c");
     return;
   }
   print("\ntemplates checklist: ");
-  print(rtc);
-  */
+  rtc.forEach(print);
+  
   File foto = File("C:\\Users\\connivia\\Downloads\\fp.png");
   ItemCheckList item1 = new ItemCheckList(id: 1, nome:'Verificar freios');
   item1.alterarStatus();
