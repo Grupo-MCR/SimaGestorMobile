@@ -1,96 +1,107 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ItemCheckList {
   int? id;
   String? nome;
   String? comentario;
   File? foto;
-  bool status = false;
+  Uint8List? fotoBytes; // usado para web
+  bool? status; // true = OK, false = Não OK, null = não respondido
 
-  // Construtor
-  ItemCheckList({
-    this.id,
-    this.nome,
-  });
+  // 🔹 Construtor
+  ItemCheckList({this.id, this.nome, this.status});
 
+  // 🔹 Criação a partir de JSON recebido da API
   factory ItemCheckList.fromJson(Map<String, dynamic> json) {
     return ItemCheckList(
       id: json['id'] as int?,
       nome: json['item_name'] as String?,
+      status: null, // começa nulo até o usuário responder
     );
   }
 
-  int? getId() {
-    return id;
+  // ===============================
+  // 🔹 GETTERS / SETTERS
+  // ===============================
+
+  int? getId() => id;
+  void setId(int id) => this.id = id;
+
+  String? getNome() => nome;
+  void setNome(String nome) => this.nome = nome;
+
+  String? getComentario() => comentario;
+  void setComentario(String comentario) => this.comentario = comentario;
+
+  File? getFoto() => foto;
+  void setFoto(File? foto) => this.foto = foto;
+
+  Uint8List? getFotoBytes() => fotoBytes;
+  void setFotoBytes(Uint8List? bytes) => fotoBytes = bytes;
+
+  bool? getStatus() => status;
+  void setStatus(bool? valor) => status = valor;
+
+  // ===============================
+  // 🔹 FUNÇÕES AUXILIARES
+  // ===============================
+
+  /// Retorna o status em formato de string para API
+  String getStatusString() {
+    if (status == null) return "nao_respondeu";
+    return status! ? "ok" : "not_ok";
   }
 
-  void setId(int id) {
-    this.id = id;
-  }
-
-  String? getNome() {
-    return nome;
-  }
-
-  void setNome(String nome) {
-    this.nome = nome;
-  }
-
-  String? getComentario() {
-    return comentario;
-  }
-
-  void setComentario(String comentario) {
-    this.comentario = comentario;
-  }
-
-  File? getFoto() {
-    return foto;
-  }
-
-  void setFoto(File foto) {
-    this.foto = foto;
-  }
-
+  /// Verifica se o item tem dados válidos antes do envio
   bool validarNull() {
-    // Valida se os campos obrigatórios são nulos
-    if(id == null || nome == null) {
+    if (id == null || nome == null) return false;
+
+    // Se o status for "não OK", precisa de comentário e foto
+    if (status == false &&
+        (comentario == null || (foto == null && fotoBytes == null))) {
       return false;
     }
-    // Valida se os campos obrigatórios quando o status é falso são nulos
-    if(status == false && (comentario == null || foto == null)) {
-      return false;
-    }
+
     return true;
   }
 
-  // Método para alterar status
+  /// 🔹 Alterna o status entre true / false / null
+  /// null → true → false → true ...
   void alterarStatus() {
-    status = status==false?true:false;
+    if (status == null) {
+      status = true;
+    } else {
+      status = !status!;
+    }
   }
 
-  // Metodo para definir resposta para API com base no status
-  String getStatus() {
-    return status==true?"ok":"not_ok";
-  }
-
-  // Retorna um Map para envio à API  
+  /// 🔹 Gera o mapa para envio à API
   Map<String, dynamic> buildItem() {
-    if(validarNull() == false) {
-      throw new ArgumentError.notNull("argumentos nulos");
+    if (!validarNull()) {
+      throw ArgumentError.notNull("argumentos nulos");
     }
-    Map<String, dynamic> item = {};
-    item['id'] = getId()??0;
-    item['result'] = getStatus();
-    item['comments'] = comentario??'';
-    if(getStatus() != "ok") {
-      item['photo'] = foto?.path??'';
+
+    final Map<String, dynamic> item = {};
+    item['id'] = getId() ?? 0;
+    item['result'] = getStatusString();
+    item['comments'] = comentario ?? '';
+
+    // Envia foto apenas se status não for OK
+    if (getStatusString() != "ok") {
+      if (kIsWeb && fotoBytes != null) {
+        item['photo'] = fotoBytes;
+      } else {
+        item['photo'] = foto?.path ?? '';
+      }
     }
+
     return item;
   }
 
   @override
   String toString() {
-    return 'ItemCheckList{id: $id, descricao: $nome, status: $status}';
+    return 'ItemCheckList{id: $id, nome: $nome, status: $status, fotoFile: ${foto == null ? 'false' : 'true'}, fotoBytes: ${fotoBytes == null ? 'false' : 'true'}}';
   }
 }

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../model/usuario.dart';
-import 'despesa_interface.dart';
-import 'abastecimento_interface.dart';
+import 'checklist_interface.dart';
+import '../interface/despesa_interface.dart';
+import '../interface/abastecimento_interface.dart';
 //import '../interfaces/checklist.dart';
 
 class HomePage extends StatelessWidget {
@@ -51,7 +52,8 @@ class HomePage extends StatelessWidget {
                         child: SizedBox(
                           width: double.infinity,
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                            crossAxisAlignment:
+                                CrossAxisAlignment.center, // centraliza
                             children: [
                               const Icon(
                                 Icons.account_circle,
@@ -129,18 +131,19 @@ class HomePage extends StatelessWidget {
                       },
                     ),
                     const SizedBox(height: 20),
-                    /*_buildMenuCard(
+                    _buildMenuCard(
                       title: "Checklists",
                       icon: Icons.assignment,
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const CheckListPage(),
+                            builder: (context) =>
+                                CheckListPage(usuario: usuario),
                           ),
                         );
                       },
-                    ),*/
+                    ),
                   ],
                 ),
               ),
