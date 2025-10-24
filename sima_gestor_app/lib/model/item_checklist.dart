@@ -83,16 +83,21 @@ class ItemCheckList {
       throw ArgumentError.notNull("argumentos nulos");
     }
 
+    print('entrou build item checklist');
     final Map<String, dynamic> item = {};
     item['id'] = getId() ?? 0;
     item['result'] = getStatusString();
     item['comments'] = comentario ?? '';
 
+    print('buildou campos item checklist');
+
     // Envia foto apenas se status não for OK
     if (getStatusString() != "ok") {
       if (kIsWeb && fotoBytes != null) {
-        item['photo'] = fotoBytes;
+        item['photo'] = fotoBytes?.toList()??[];
+        print('definiu o item do map');
       } else {
+        print('entrou pra buildar imagem local');
         item['photo'] = foto?.path ?? '';
       }
     }

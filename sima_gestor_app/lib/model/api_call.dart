@@ -165,7 +165,7 @@ class APICall {
       String link = "https://" + getServer() + ".simagestor.com.br/api/api_checklist";
       Map<String, String> headers = {'Authorization': "Bearer " + getToken()};
       Map<String, String> fieldsBody = {};
-      Map<String, String> filesBody = {};
+      Map<String, dynamic> filesBody = {};
       Map<String, Map<String, String>> midiaTypes = {};
       checklist.forEach((key, value) {
         if(key.contains("photo")) {
