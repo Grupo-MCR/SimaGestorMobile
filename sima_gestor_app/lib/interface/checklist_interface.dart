@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io' show File;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:sima_gestor_app/model/api_call.dart';
 import 'package:sima_gestor_app/model/item_checklist.dart';
 import 'package:sima_gestor_app/model/usuario.dart';
 import 'package:sima_gestor_app/model/veiculo.dart';
+import 'package:sima_gestor_app/service/checklist_service.dart';
 
 class CheckListPage extends StatefulWidget {
   final Usuario usuario;
@@ -121,7 +123,7 @@ class _CheckListPageState extends State<CheckListPage> {
     }
   }
 
-  void _salvarChecklist() {
+  void _salvarChecklist() async {
     if (_selectedPlaca == null || _selectedMotorista == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Selecione a placa e o motorista.")),
@@ -143,10 +145,32 @@ class _CheckListPageState extends State<CheckListPage> {
       return;
     }
 
-    _itens.forEach(print);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Checklist salvo com sucesso!")),
+    final assinaturaBytes = await _signatureController.toPngBytes();
+    final assinaturaBase64 = base64Encode(assinaturaBytes!);
+
+    final api = APICall(widget.usuario.getServidor(), widget.usuario.getToken());
+    final service = ChecklistService(api);
+
+    final veiculo = _veiculos.firstWhere((v) => v.getPlaca() == _selectedPlaca);
+    final motorista = _motoristas.firstWhere((m) => m.getNome() == _selectedMotorista);
+
+    final sucesso = await service.processarChecklist(
+      idVeiculo: veiculo.getId()!,
+      idMotorista: motorista.getId()!,
+      nomeVerificador: _responsavelController.text.trim(),
+      assinaturaBase64: assinaturaBase64,
+      itens: _itens,
     );
+
+    if (sucesso) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Checklist enviado com sucesso!")),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Erro ao enviar checklist.")),
+      );
+    }
   }
 
   @override

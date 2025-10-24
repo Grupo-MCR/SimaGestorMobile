@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart' as http_parser;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 // Classe para fazer as comunicações com a API
 class Fetch {
@@ -44,7 +45,7 @@ class Fetch {
   }
   
   //Método para fazer um fetch do tipo MultipartFormData no modo POST
-  Future<dynamic> multipartPost(String apiLink, Map<String, String> headers, Map<String, String> body, Map<String, String> files, Map<String, Map<String, String>> mediaTypes) async {
+  Future<dynamic> multipartPost(String apiLink, Map<String, String> headers, Map<String, String> body, Map<String, dynamic> files, Map<String, Map<String, String>> mediaTypes) async {
     var requestUrl = Uri.parse(apiLink); // Link da API
     var request = http.MultipartRequest('POST', requestUrl); // Declaração da requisição
     
@@ -60,11 +61,26 @@ class Fetch {
 
 
     // Define os campos de arquivos da requisição com base no map de arquivos e tipo de midia passadas
-    files.forEach(await (key, value) async {
-      request.files.add(await http.MultipartFile.fromPath(
-      key, value,
-      contentType: http_parser.MediaType(mediaTypes[key]?.keys.first??'image', mediaTypes[key]?.values.first??'*')));
-    });
+    if (kIsWeb) {
+      files.forEach(await (key, value) async {
+        request.files.add(http.MultipartFile.fromBytes(
+          key, value!,
+          filename: 'imagem_' + key,
+          contentType: http_parser.MediaType(mediaTypes[key]?.keys.first??'image', mediaTypes[key]?.values.first??'*')));
+      });
+    } else {
+      files.forEach(await (key, value) async {
+        request.files.add(await http.MultipartFile.fromPath(
+        key, value,
+        contentType: http_parser.MediaType(mediaTypes[key]?.keys.first??'image', mediaTypes[key]?.values.first??'*')));
+      });
+    }
+
+    print(request);
+    print(request.files.first.toString());
+    print(request.files.first.field);
+    print(request.files.first.filename);
+    print(request.files.first.contentType.toString());
 
     // bloco try realiza a requisição
     try {
