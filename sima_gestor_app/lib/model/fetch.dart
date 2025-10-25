@@ -109,7 +109,6 @@ class Fetch {
       });
     }
 
-    print(request);
     if (request.files.isNotEmpty) {
       print(request.files.first.toString());
       print(request.files.first.field);
