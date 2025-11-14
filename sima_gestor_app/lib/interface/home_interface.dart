@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../interface/login_interface.dart';
+
 
 import '../model/usuario.dart';
 import 'checklist_interface.dart';
@@ -43,7 +45,11 @@ class HomePage extends StatelessWidget {
                     ),
                     onSelected: (value) {
                       if (value == 1) {
-                        Navigator.pop(context); // sair
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => const LoginPage()),
+                          (route) => false, // remove todas as telas anteriores
+                        );
                       }
                     },
                     itemBuilder: (context) => [
@@ -118,7 +124,7 @@ class HomePage extends StatelessWidget {
                       title: "Despesas",
                       icon: Icons.attach_money,
                       onTap: () {
-                        // CORRIGIDO: Agora passa servidor e tokenn
+                        // CORRIGIDO: Agora passa servidor e token
                         Navigator.push(
                           context,
                           MaterialPageRoute(
