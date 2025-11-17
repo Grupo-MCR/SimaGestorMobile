@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io' show File;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:camera/camera.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:signature/signature.dart';
 import 'package:sima_gestor_app/model/api_call.dart';
@@ -16,17 +18,27 @@ class CheckListPage extends StatefulWidget {
   const CheckListPage({Key? key, required this.usuario}) : super(key: key);
 
   @override
+  String get restorationScopeId => 'ChecklistPage';
+
+  @override
   State<CheckListPage> createState() => _CheckListPageState();
 }
 
-class _CheckListPageState extends State<CheckListPage> {
+class _CheckListPageState extends State<CheckListPage> 
+    with RestorationMixin, WidgetsBindingObserver {
   final ImagePicker _picker = ImagePicker();
   final SignatureController _signatureController = SignatureController(
     penStrokeWidth: 3,
     penColor: Colors.white,
   );
 
-  final TextEditingController _responsavelController = TextEditingController();
+  final RestorableTextEditingController _responsavelController = 
+      RestorableTextEditingController();
+  
+  // Adicionar Restorables para manter estado
+  final RestorableString _selectedPlacaRestoration = RestorableString('');
+  final RestorableString _selectedMotoristaRestoration = RestorableString('');
+  final RestorableBool _isLoadingRestoration = RestorableBool(true);
 
   List<Veiculo> _veiculos = [];
   List<Usuario> _motoristas = [];
@@ -39,42 +51,116 @@ class _CheckListPageState extends State<CheckListPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadPlacas(widget.usuario);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _signatureController.dispose();
+    _responsavelController.dispose();
+    _selectedPlacaRestoration.dispose();
+    _selectedMotoristaRestoration.dispose();
+    _isLoadingRestoration.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Monitora quando o app volta do background
+    if (state == AppLifecycleState.resumed) {
+      print('App retornou do background');
+      // Força rebuild para manter a tela
+      if (mounted) {
+        setState(() {});
+      }
+    }
+  }
+
+  @override
+  String? get restorationId => 'ChecklistPageRestoration';
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(_responsavelController, 'responsavel');
+    registerForRestoration(_selectedPlacaRestoration, 'selectedPlaca');
+    registerForRestoration(_selectedMotoristaRestoration, 'selectedMotorista');
+    registerForRestoration(_isLoadingRestoration, 'isLoading');
+    
+    // Restaurar valores
+    if (_selectedPlacaRestoration.value.isNotEmpty) {
+      _selectedPlaca = _selectedPlacaRestoration.value;
+    }
+    if (_selectedMotoristaRestoration.value.isNotEmpty) {
+      _selectedMotorista = _selectedMotoristaRestoration.value;
+    }
+    _isLoading = _isLoadingRestoration.value;
+  }
+
+  String cameraStatus = 'desconhecido';
+
+  Future<void> _checkCamera() async {
+    final status = await Permission.camera.status;
+    setState(() => cameraStatus = status.toString());
+  }
+
+  Future<void> _requestCamera() async {
+    final status = await Permission.camera.request();
+    setState(() => cameraStatus = status.toString());
   }
 
   void _loadItens(Usuario user, Veiculo veiculo) async {
     setState(() => _isLoading = true);
+    _isLoadingRestoration.value = true;
 
     final api = APICall(user.getServidor(), user.getToken());
 
     try {
       var response = await api.receberItensChecklist(veiculo.getId() ?? 1);
-      setState(() {
-        _itens = response;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _itens = response;
+          _isLoading = false;
+          _isLoadingRestoration.value = false;
+        });
+      }
     } catch (e, stack) {
       print('Erro ao carregar itens: $e');
       print(stack);
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _isLoadingRestoration.value = false;
+        });
+      }
     }
   }
 
   void _loadPlacas(Usuario user) async {
     setState(() => _isLoading = true);
+    _isLoadingRestoration.value = true;
 
     final api = APICall(user.getServidor(), user.getToken());
 
     try {
       var response = await api.receberVeiculos();
-      setState(() {
-        _veiculos = response;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _veiculos = response;
+          _isLoading = false;
+          _isLoadingRestoration.value = false;
+        });
+      }
     } catch (e, stack) {
       print('Erro ao carregar placas: $e');
       print(stack);
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _isLoadingRestoration.value = false;
+        });
+      }
     }
   }
 
@@ -84,6 +170,7 @@ class _CheckListPageState extends State<CheckListPage> {
       _motoristas = [];
       _selectedMotorista = null;
     });
+    _isLoadingRestoration.value = true;
 
     final api = APICall(user.getServidor(), user.getToken());
 
@@ -91,60 +178,155 @@ class _CheckListPageState extends State<CheckListPage> {
       await Future.delayed(const Duration(milliseconds: 600));
       var response = await api.receberMotoristas();
 
-      setState(() {
-        _motoristas = response;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _motoristas = response;
+          _isLoading = false;
+          _isLoadingRestoration.value = false;
+        });
+      }
     } catch (e) {
       print("Erro ao carregar motoristas: $e");
-      setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _selecionarImagem(int index) async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      final item = _itens[index];
-
-      if (kIsWeb) {
-        final bytes = await image.readAsBytes();
+      if (mounted) {
         setState(() {
-          item.setFotoBytes(bytes);
-          item.setFoto(null);
-          _itens[index] = item;
-        });
-      } else {
-        setState(() {
-          item.setFoto(File(image.path));
-          item.setFotoBytes(null);
-          _itens[index] = item;
+          _isLoading = false;
+          _isLoadingRestoration.value = false;
         });
       }
     }
   }
 
+  Future<void> _selecionarImagem(int index) async {
+    try {
+      await _requestCamera();
+      await _checkCamera();
+      
+      XFile? image;
+      if (kIsWeb) {
+        image = await _picker.pickImage(source: ImageSource.gallery);
+      } else {
+        image = await _picker.pickImage(
+          source: ImageSource.camera,
+          imageQuality: 80,
+          preferredCameraDevice: CameraDevice.rear,
+        );
+      }
+
+      if (image != null && mounted) {
+        final item = _itens[index];
+        
+        if (kIsWeb) {
+          final bytes = await image.readAsBytes();
+          setState(() {
+            item.setFotoBytes(bytes);
+            item.setFoto(null);
+            _itens[index] = item;
+          });
+        } else {
+          final imagePath = image.path;
+          if (imagePath.isNotEmpty) {
+            setState(() {
+              item.setFoto(File(imagePath));
+              item.setFotoBytes(null);
+              _itens[index] = item;
+            });
+          }
+        }
+        
+        print('Foto capturada com sucesso para o item $index');
+      }
+    } catch (e) {
+      print('Erro ao selecionar imagem: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao capturar foto: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   void _salvarChecklist() async {
+    // Validações principais
     if (_selectedPlaca == null || _selectedMotorista == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Selecione a placa e o motorista.")),
+        const SnackBar(
+          content: Text("Selecione a placa e o motorista.",
+              style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
 
-    if (_responsavelController.text.trim().isEmpty) {
+    if (_responsavelController.value.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Insira o nome do responsável.")),
+        const SnackBar(
+          content: Text("Insira o nome do responsável.",
+              style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
 
     if (_signatureController.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Adicione a assinatura digital.")),
+        const SnackBar(
+          content: Text("Adicione a assinatura digital.",
+              style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
 
+    // Validação dos itens do checklist
+    for (final item in _itens) {
+      if (item.getStatus() == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Responda o item '${item.getNome() ?? "sem nome"}'.",
+              style: const TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      if (item.getStatus() == false) {
+        if (item.getComentario() == null || item.getComentario()!.trim().isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                "Adicione um comentário no item '${item.getNome() ?? "sem nome"}'.",
+                style: const TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+        if (item.getFoto() == null && item.getFotoBytes() == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                "Adicione uma foto para o item '${item.getNome() ?? "sem nome"}'.",
+                style: const TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+      }
+    }
+
+    // Se tudo estiver válido, prossegue com o envio
     final assinaturaBytes = await _signatureController.toPngBytes();
     final assinaturaBase64 = base64Encode(assinaturaBytes!);
 
@@ -157,27 +339,30 @@ class _CheckListPageState extends State<CheckListPage> {
     final sucesso = await service.processarChecklist(
       idVeiculo: veiculo.getId()!,
       idMotorista: motorista.getId()!,
-      nomeVerificador: _responsavelController.text.trim(),
+      nomeVerificador: _responsavelController.value.text.trim(),
       assinaturaBase64: assinaturaBase64,
       itens: _itens,
     );
 
-    if (sucesso) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Checklist enviado com sucesso!")),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Erro ao enviar checklist.")),
-      );
+    if (mounted) {
+      if (sucesso) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Checklist enviado com sucesso!",
+                style: TextStyle(color: Colors.white)),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Erro ao enviar checklist.",
+                style: TextStyle(color: Colors.white)),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
-  }
-
-  @override
-  void dispose() {
-    _signatureController.dispose();
-    _responsavelController.dispose();
-    super.dispose();
   }
 
   @override
@@ -226,8 +411,10 @@ class _CheckListPageState extends State<CheckListPage> {
                       if (val != null) {
                         setState(() {
                           _selectedPlaca = val;
+                          _selectedPlacaRestoration.value = val;
                           _motoristas = [];
                           _selectedMotorista = null;
+                          _selectedMotoristaRestoration.value = '';
                         });
                         _loadMotoristas(widget.usuario);
                         _loadItens(
@@ -265,7 +452,10 @@ class _CheckListPageState extends State<CheckListPage> {
                         )
                         .toList(),
                     onChanged: (val) {
-                      setState(() => _selectedMotorista = val);
+                      setState(() {
+                        _selectedMotorista = val;
+                        _selectedMotoristaRestoration.value = val ?? '';
+                      });
                     },
                   ),
                   const Divider(color: Colors.white38, height: 40),
@@ -364,9 +554,9 @@ class _CheckListPageState extends State<CheckListPage> {
                 const SizedBox(height: 10),
                 Center(
                   child: ElevatedButton.icon(
-                    icon: const Icon(Icons.photo, color: Colors.white),
+                    icon: const Icon(Icons.camera, color: Colors.white),
                     label: const Text(
-                      "Anexar foto da galeria",
+                      "Abrir a câmera",
                       style: TextStyle(color: Colors.white),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -414,7 +604,7 @@ class _CheckListPageState extends State<CheckListPage> {
       ),
       const SizedBox(height: 8),
       TextField(
-        controller: _responsavelController,
+        controller: _responsavelController.value,
         style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
           hintText: "Digite o nome completo",

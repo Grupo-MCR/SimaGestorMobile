@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:sima_gestor_app/model/usuario.dart';
 import 'home_interface.dart';
 import '../service/login_service.dart';
+
+
+
+typedef RestorableRouteBuilder<T> = Route<T> Function(BuildContext context, dynamic arguments);
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -9,10 +14,33 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _urlController = TextEditingController();
-  final TextEditingController _senhaController = TextEditingController();
+class _LoginPageState extends State<LoginPage> with RestorationMixin{
+
+  final RestorableTextEditingController _emailController = RestorableTextEditingController();
+  final RestorableTextEditingController _urlController = RestorableTextEditingController();
+  final RestorableTextEditingController _senhaController = RestorableTextEditingController();
+
+  @override
+  String? get restorationId => 'loginPageRestoration';
+
+  @override
+    void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(_emailController, 'email');
+    registerForRestoration(_senhaController, 'senha');
+    registerForRestoration(_urlController, 'url');
+  }
+
+  @pragma('vm:entry-point')
+  static Route<Object?> _homeRouteBuilder(BuildContext context, dynamic arguments) {
+    return MaterialPageRoute<Object?>(
+      builder: (BuildContext context) => HomePage(usuario: arguments),
+    );
+  }
+
+  RestorableRouteBuilder<Object?> hRoute = (BuildContext context, dynamic arguments) =>
+        MaterialPageRoute(
+          builder: (context) => HomePage(usuario: arguments),
+        );
 
   bool _loading = false;
 
@@ -21,17 +49,14 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       final logged = await LoginService.login(
-        _emailController.text.trim(),
-        _senhaController.text.trim(),
-        _urlController.text.trim(),
+        _emailController.value.text.trim(),
+        _senhaController.value.text.trim(),
+        _urlController.value.text.trim(),
       );
 
       // se deu certo -> navega
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomePage(usuario: logged),
-        ),
+      Navigator.restorablePushReplacement(
+        context, _homeRouteBuilder
       );
     } catch (e) {
       // se deu erro -> mostra snackbar
@@ -92,7 +117,7 @@ class _LoginPageState extends State<LoginPage> {
 
                       // Email
                       TextField(
-                        controller: _emailController,
+                        controller: _emailController.value,
                         decoration: const InputDecoration(
                           labelText: "Email",
                           labelStyle: TextStyle(color: Colors.white70),
@@ -109,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
 
                       // Prefixo - URL
                       TextField(
-                        controller: _urlController,
+                        controller: _urlController.value,
                         decoration: const InputDecoration(
                           labelText: "Prefixo - URL",
                           labelStyle: TextStyle(color: Colors.white70),
@@ -126,7 +151,7 @@ class _LoginPageState extends State<LoginPage> {
 
                       // Senha
                       TextField(
-                        controller: _senhaController,
+                        controller: _senhaController.value,
                         obscureText: true,
                         decoration: const InputDecoration(
                           labelText: "Senha",
@@ -176,7 +201,7 @@ class _LoginPageState extends State<LoginPage> {
                 TextSpan(
                   text: "From ",
                   style: TextStyle(color: Colors.white70),
-                  children: [
+                  children: [ 
                     TextSpan(
                       text: "simagestor.com.br",
                       style: TextStyle(
