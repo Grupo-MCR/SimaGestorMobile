@@ -23,16 +23,57 @@ class Abastecimento {
     calcularValorTotal();
   }
 
-  bool validarNull() {
-    if(placa == null || 
-        dataHora == null ||
-        km == null ||
-        combustivel == null ||
-        valorLitro == null ||
-        litrosAbastecidos == null ||
-        totalReais == null) {
-      return false;
-    } 
+  void validarPlaca() {
+    if(placa == null || placa!.isEmpty) {
+      throw Exception("Placa do Veículo Não Informada ou Inválida");
+    }
+  }
+
+  void validarDataHora() {
+    if(dataHora == null) {
+      throw Exception("Data e/ou Hora do Abastecimento Não Informada ou Inválida");
+    }
+  }
+
+  void validarKm() {
+    if(km == null || ((km??0) < 0)) {
+      throw Exception("Kilometragem no Momemnto do Abastecimento Não Informada ou Inválida");
+    }
+  }
+
+  void validarCombustivel() {
+    if(combustivel == null) {
+      throw Exception("Tipo de Combustível Não Informado ou Inválido");
+    }
+  }
+
+  void validarValorLitro() {
+    if(valorLitro == null || ((valorLitro??0) <= 0)) {
+      throw Exception("Valor Por Litro do Combustível Não Informado ou Inválido");
+    }
+  }
+
+  void validarLitrosAbastecidos() {
+    if(combustivel == null || ((litrosAbastecidos??0) <= 0)) {
+      throw Exception("Quantidade de Litros Abastecidos Não Informada ou Inválida");
+    }
+  }
+  
+  void validarTotalReais() {
+    calcularValorTotal();
+    if(totalReais == null || ((totalReais??0) <= 0)) {
+      throw Exception("Erro ao Calcular Valor Total do Abastecimento: Revise os Outros Dados");
+    }
+  }
+
+  bool validarAll() {
+    validarPlaca();
+    validarDataHora();
+    validarKm();
+    validarCombustivel();
+    validarValorLitro();
+    validarLitrosAbastecidos();
+    validarValorLitro();
     return true;
   }
 
@@ -73,8 +114,8 @@ class Abastecimento {
     return combustivel;
   }
 
-  void setTipoCombustivel(String tipoCombustivel) {
-    this.combustivel = tipoCombustivel;
+  void setTipoCombustivel(String combustivel) {
+    this.combustivel = combustivel;
   }
 
   double? getValorLitro() {
@@ -101,14 +142,14 @@ class Abastecimento {
 
   void calcularValorTotal() {
     if(valorLitro == null || litrosAbastecidos == null) {
-      throw new ArgumentError.notNull("erro: o preço do litro e/ou a quantidade abastecida não foram informadas");
+      throw Exception("erro: o preço do litro e/ou a quantidade abastecida não foram informadas");
     }
-    this.totalReais =  (valorLitro??1) * (litrosAbastecidos??1);
+    totalReais =  (valorLitro??1) * (litrosAbastecidos??1);
   }
 
   Map<String, dynamic> buildAbastecimento() {
-    if(validarNull() == false) {
-      throw new ArgumentError.notNull("erro: informações incorretas");
+    if(validarAll() != true) {
+      throw Exception("erro: informações incorretas");
     }
     Map<String, dynamic> abastecimento = {};
     abastecimento["placa"] = placa;
