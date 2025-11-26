@@ -123,21 +123,31 @@ class APICall {
   }
 
   dynamic enviarDespesa(Map<String, dynamic> despesa) async {
-    try {
-      String link = "https://" + getServer() + ".simagestor.com.br/api/api_despesas.php";
-      Map<String, String> headers = {'Authorization': "Bearer " + getToken()};
-      Map<String, String> body = {};
-      despesa.forEach((key, value) {
-        body[key] = value.toString();
-      });
+  try {
+    String link = "https://" + getServer() + ".simagestor.com.br/api/api_despesas.php";
+    Map<String, String> headers = {'Authorization': "Bearer " + getToken()};
+    Map<String, String> body = {};
+    
+    despesa.forEach((key, value) {
+      body[key] = value.toString();
+    });
 
-      dynamic responseDespesa = await fetch.multipartPost(link, headers, body, {}, {});
-      return responseDespesa['message'];
-    } catch(e) {
-      print(e.toString());
-      return null;
+    print("Link: $link");
+    print("Headers: $headers");
+    print("Body: $body");
+
+    dynamic responseDespesa = await fetch.multipartPost(link, headers, body, {}, {});
+    
+    if (responseDespesa == null) {
+      throw Exception("Resposta da API é null");
     }
+    
+    return responseDespesa['message'];
+  } catch(e) {
+    print("Erro completo: $e");
+    throw Exception(e.toString());
   }
+}
 
   // Método para retornar uma lista com os itens de chelist do template do (id)véiculo passado
   dynamic receberItensChecklist(int idVeiculo) async {
@@ -165,7 +175,7 @@ class APICall {
       String link = "https://" + getServer() + ".simagestor.com.br/api/api_checklist";
       Map<String, String> headers = {'Authorization': "Bearer " + getToken()};
       Map<String, String> fieldsBody = {};
-      Map<String, String> filesBody = {};
+      Map<String, dynamic> filesBody = {};
       Map<String, Map<String, String>> midiaTypes = {};
       checklist.forEach((key, value) {
         if(key.contains("photo")) {
