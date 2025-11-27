@@ -24,8 +24,7 @@ class _CadastroManualPageState extends State<CadastroManualPage> {
   final TextEditingController kmController = TextEditingController();
   final TextEditingController combustivelController = TextEditingController();
   final TextEditingController valorPorLitroController = TextEditingController();
-  final TextEditingController litrosAbastecidosController =
-      TextEditingController();
+  final TextEditingController litrosAbastecidosController = TextEditingController();
   final TextEditingController totalController = TextEditingController();
   final TextEditingController dataController = TextEditingController();
   DateTime? dataSelecionada;
@@ -54,10 +53,8 @@ class _CadastroManualPageState extends State<CadastroManualPage> {
     setState(() => _isLoading = true);
 
     try {
-      final combustivel = _selectedCombustivel == 'Outros'
-          ? combustivelController.text.trim()
-          : _selectedCombustivel ?? '';
-
+      final combustivel = _selectedCombustivel == 'Outros' ? combustivelController.text.trim() : _selectedCombustivel ?? '';
+      
       Abastecimento abastecimento = Abastecimento(
         placaController.text.trim(),
         dataSelecionada,
