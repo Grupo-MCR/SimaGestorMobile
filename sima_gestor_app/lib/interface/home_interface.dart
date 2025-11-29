@@ -148,7 +148,7 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin 
       context,
       MaterialPageRoute(
         builder: (context) => InterfaceDespesas(
-          servidor: widget.usuario.getServidor() ?? '',
+          servidor: widget.usuario.getServidor(),
           token: widget.usuario.getToken() ?? '',
         ),
       ),

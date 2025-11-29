@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:sima_gestor_app/model/abastecimento.dart';
 import 'package:sima_gestor_app/model/api_call.dart';
 import 'package:sima_gestor_app/model/usuario.dart';
@@ -17,64 +18,68 @@ class CadastroManualPage extends StatefulWidget {
 class _CadastroManualPageState extends State<CadastroManualPage> {
   List<Veiculo> _veiculos = [];
   String? _selectedPlaca;
+  String? _selectedCombustivel;
 
   final TextEditingController placaController = TextEditingController();
-  final TextEditingController dataHoraController = TextEditingController();
   final TextEditingController kmController = TextEditingController();
   final TextEditingController combustivelController = TextEditingController();
   final TextEditingController valorPorLitroController = TextEditingController();
-  final TextEditingController litrosAbastecidosController =
-      TextEditingController();
+  final TextEditingController litrosAbastecidosController = TextEditingController();
   final TextEditingController totalController = TextEditingController();
+  final TextEditingController dataController = TextEditingController();
+  DateTime? dataSelecionada;
 
   bool _isLoading = true;
+
+  final List<String> _tiposCombustivel = [
+    'Gasolina',
+    'Etanol',
+    'Diesel S10',
+    'Diesel S500',
+    'Gás Natural Veicular (GNV)',
+    'Outros',
+  ];
 
   @override
   void initState() {
     super.initState();
     _loadPlacas(widget.usuario);
+
     valorPorLitroController.addListener(_calcularTotal);
     litrosAbastecidosController.addListener(_calcularTotal);
   }
 
-  //  Função que converte os inputs e manda pro service mandar para a API
   Future<void> mandarAbastecimento() async {
     setState(() => _isLoading = true);
 
     try {
-      //  Conversão da data pro formato ISO8601 para fazer o parse pra DateTime
-      String dataISO8601 = dataHoraController.text.trim().substring(6, 10) +
-                      '-' + dataHoraController.text.trim().substring(3, 5) +
-                      '-' + dataHoraController.text.trim().substring(0, 2) + 
-                      dataHoraController.text.trim().replaceAll(RegExp(r' '), 'T').replaceAll(RegExp(r'/'), '-').substring(10, 16);
+      final combustivel = _selectedCombustivel == 'Outros' ? combustivelController.text.trim() : _selectedCombustivel ?? '';
       
-      //  Declaração de um objeto 'Abastecimento' pra realizar o envio a API
-      Abastecimento abastecimento = new Abastecimento(
-        placaController.text.trim(), 
-        DateTime.tryParse(dataISO8601), 
-        double.tryParse(kmController.text.trim()), 
-        combustivelController.text.trim(), 
-        double.tryParse(valorPorLitroController.text.trim()), 
-        double.tryParse(litrosAbastecidosController.text.trim()));
-      
-      //  Tentativa de envio do abastecimento a API
-      String resposta = await AbastecimentoService.enviarAbastecimento(widget.usuario.getServidor(), widget.usuario.getToken()??'', abastecimento);
-      
-      dataHoraController.clear();
+      Abastecimento abastecimento = Abastecimento(
+        placaController.text.trim(),
+        dataSelecionada,
+        double.tryParse(kmController.text.trim()),
+        combustivel,
+        double.tryParse(valorPorLitroController.text.replaceAll(',', '.')),
+        double.tryParse(litrosAbastecidosController.text.replaceAll(',', '.')),
+      );
+
+      String resposta = await AbastecimentoService.enviarAbastecimento(
+        widget.usuario.getServidor(),
+        widget.usuario.getToken() ?? '',
+        abastecimento,
+      );
+
+      dataController.clear();
       kmController.clear();
       combustivelController.clear();
       valorPorLitroController.clear();
       litrosAbastecidosController.clear();
 
-      //  Popup inferior com mensagem de sucesso retornada da API
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(resposta),
-          backgroundColor: Colors.green,
-        ),
+        SnackBar(content: Text(resposta), backgroundColor: Colors.green),
       );
     } catch (e) {
-      //  Popup inferior com mensagem de erro retornada da API
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.toString().replaceAll(RegExp('Exception: '), '')),
@@ -86,15 +91,12 @@ class _CadastroManualPageState extends State<CadastroManualPage> {
     }
   }
 
-  /// 🔹 Carrega as placas de veículos pela API
   void _loadPlacas(Usuario user) async {
     setState(() => _isLoading = true);
-
     final api = APICall(user.getServidor(), user.getToken());
 
     try {
       var response = await api.receberVeiculos();
-
       setState(() {
         _veiculos = response;
         _isLoading = false;
@@ -106,7 +108,6 @@ class _CadastroManualPageState extends State<CadastroManualPage> {
     }
   }
 
-  /// 🔹 Atualiza o total automaticamente
   void _calcularTotal() {
     final double valorPorLitro =
         double.tryParse(valorPorLitroController.text.replaceAll(',', '.')) ?? 0;
@@ -120,62 +121,104 @@ class _CadastroManualPageState extends State<CadastroManualPage> {
     totalController.text = total.toStringAsFixed(2);
   }
 
-  /// 🔹 Abre o seletor de data + hora
-  void _selectDateTime(BuildContext context) async {
-    final DateTime? pickedDate = await showDatePicker(
+  Future<void> _selecionarDataHora() async {
+    final now = DateTime.now();
+    final DateTime? data = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: Colors.green,
-              onPrimary: Colors.white,
-              surface: Colors.black,
-              onSurface: Colors.white,
-            ),
-          ),
-          child: child!,
-        );
-      },
+      initialDate: dataSelecionada ?? now,
+      firstDate: DateTime(2020),
+      lastDate: now,
+      builder: (context, child) => Theme(
+        data: ThemeData.dark().copyWith(
+          colorScheme: const ColorScheme.dark(primary: Colors.green),
+        ),
+        child: child!,
+      ),
     );
 
-    if (pickedDate != null) {
-      final TimeOfDay? pickedTime = await showTimePicker(
+    if (data != null) {
+      final TimeOfDay? hora = await showTimePicker(
         context: context,
-        initialTime: TimeOfDay.now(),
-        builder: (context, child) {
-          return Theme(
-            data: Theme.of(context).copyWith(
-              colorScheme: const ColorScheme.dark(
-                primary: Colors.green,
-                onPrimary: Colors.white,
-                surface: Colors.black,
-                onSurface: Colors.white,
-              ),
-            ),
-            child: child!,
-          );
-        },
+        initialTime: TimeOfDay.fromDateTime(now),
+        builder: (context, child) => Theme(
+          data: ThemeData.dark().copyWith(
+            colorScheme: const ColorScheme.dark(primary: Colors.green),
+          ),
+          child: child!,
+        ),
       );
 
-      if (pickedTime != null) {
-        final DateTime combined = DateTime(
-          pickedDate.year,
-          pickedDate.month,
-          pickedDate.day,
-          pickedTime.hour,
-          pickedTime.minute,
+      if (hora != null) {
+        final selecionada = DateTime(
+          data.year,
+          data.month,
+          data.day,
+          hora.hour,
+          hora.minute,
         );
+
+        if (selecionada.isAfter(now)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Não é permitido escolher data futura."),
+            ),
+          );
+          return;
+        }
+
         setState(() {
-          dataHoraController.text =
-              "${combined.day.toString().padLeft(2, '0')}/${combined.month.toString().padLeft(2, '0')}/${combined.year} "
-              "${pickedTime.hour.toString().padLeft(2, '0')}:${pickedTime.minute.toString().padLeft(2, '0')}";
+          dataSelecionada = selecionada;
+          dataController.text =
+              "${selecionada.day.toString().padLeft(2, '0')}/"
+              "${selecionada.month.toString().padLeft(2, '0')}/"
+              "${selecionada.year} ${hora.hour.toString().padLeft(2, '0')}:"
+              "${hora.minute.toString().padLeft(2, '0')}";
         });
       }
     }
+  }
+
+  ///  Formata estilo Pix (digita 500 => 5,00)
+  String _formatarValorPix(String value) {
+    String numeric = value.replaceAll(RegExp(r'[^0-9]'), '');
+    if (numeric.isEmpty) return '';
+    while (numeric.length < 3) {
+      numeric = '0$numeric';
+    }
+    double valor = double.parse(numeric) / 100.0;
+    return valor.toStringAsFixed(2).replaceAll('.', ',');
+  }
+
+  ///  Campo genérico
+  Widget _buildCampo(
+    String label,
+    TextEditingController controller, {
+    bool readOnly = false,
+    TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
+    void Function(String)? onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextField(
+        controller: controller,
+        keyboardType: keyboardType,
+        readOnly: readOnly,
+        inputFormatters: inputFormatters,
+        onChanged: onChanged,
+        style: const TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: const TextStyle(color: Colors.white),
+          enabledBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.white24),
+          ),
+          focusedBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.green),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -196,142 +239,161 @@ class _CadastroManualPageState extends State<CadastroManualPage> {
               padding: const EdgeInsets.all(16.0),
               child: ListView(
                 children: [
-                  /// 🔹 Dropdown de Placas
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: DropdownButtonFormField<String>(
-                      decoration: const InputDecoration(
-                        labelText: 'Placa',
-                        labelStyle: TextStyle(color: Colors.white),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white24),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.green),
-                        ),
+                  // 🔹 Dropdown de placa
+                  DropdownButtonFormField<String>(
+                    decoration: const InputDecoration(
+                      labelText: 'Placa',
+                      labelStyle: TextStyle(color: Colors.white),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white24),
                       ),
-                      dropdownColor: Colors.black,
-                      value:
-                          _selectedPlaca != null &&
-                              _veiculos.any(
-                                (v) => v.getPlaca() == _selectedPlaca,
-                              )
-                          ? _selectedPlaca
-                          : null,
-                      items: _veiculos.map((v) {
-                        final placa =
-                            v.getPlaca()?.toString() ??
-                            v.getPlaca()?.toString() ??
-                            v.getPlaca()?.toString() ??
-                            '(sem placa)';
-                        return DropdownMenuItem<String>(
-                          value: placa,
-                          child: Text(
-                            placa,
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (val) {
-                        setState(() {
-                          _selectedPlaca = val;
-                          placaController.text = val ?? '';
-                        });
-                      },
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.green),
+                      ),
                     ),
+                    dropdownColor: Colors.black,
+                    value: _selectedPlaca,
+                    items: _veiculos.map((v) {
+                      final placa = v.getPlaca()?.toString() ?? '(sem placa)';
+                      return DropdownMenuItem<String>(
+                        value: placa,
+                        child: Text(
+                          placa,
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      setState(() {
+                        _selectedPlaca = val;
+                        placaController.text = val ?? '';
+                      });
+                    },
                   ),
 
-                  /// 🔹 Campo Data + Hora
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: TextField(
-                      controller: dataHoraController,
-                      readOnly: true,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        labelText: 'Data e Hora',
-                        labelStyle: TextStyle(color: Colors.white70),
-                        suffixIcon: Icon(
-                          Icons.calendar_today,
-                          color: Colors.green,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white24),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.green),
-                        ),
+                  const SizedBox(height: 16),
+
+                  // 🔹 Data e hora
+                  TextField(
+                    controller: dataController,
+                    style: const TextStyle(color: Colors.white),
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      labelText: "Data e hora do checklist",
+                      labelStyle: const TextStyle(color: Colors.white70),
+                      suffixIcon: const Icon(
+                        Icons.calendar_today,
+                        color: Colors.green,
                       ),
-                      onTap: () => _selectDateTime(context),
+                      enabledBorder: const OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white24),
+                      ),
+                      focusedBorder: const OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.green),
+                      ),
                     ),
+                    onTap: _selecionarDataHora,
                   ),
 
-                  _buildCampo('KM', kmController),
-                  _buildCampo('Combustível', combustivelController),
+                  _buildCampo(
+                    'KM',
+                    kmController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  ),
+
+                  // 🔹 Dropdown de combustível
+                  DropdownButtonFormField<String>(
+                    decoration: const InputDecoration(
+                      labelText: 'Combustível',
+                      labelStyle: TextStyle(color: Colors.white),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white24),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.green),
+                      ),
+                    ),
+                    dropdownColor: Colors.black,
+                    value: _selectedCombustivel,
+                    items: _tiposCombustivel.map((c) {
+                      return DropdownMenuItem<String>(
+                        value: c,
+                        child: Text(
+                          c,
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      setState(() {
+                        _selectedCombustivel = val;
+                        if (val != 'Outros') combustivelController.clear();
+                      });
+                    },
+                  ),
+
+                  // 🔹 Campo "Outros" aparece aqui
+                  if (_selectedCombustivel == 'Outros')
+                    _buildCampo('Informe o combustível', combustivelController),
+
+                  // 🔹 Campos com formatação Pix
                   _buildCampo(
                     'Valor por Litro',
                     valorPorLitroController,
                     keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      final formatado = _formatarValorPix(value);
+                      if (formatado != valorPorLitroController.text) {
+                        valorPorLitroController.value = TextEditingValue(
+                          text: formatado,
+                          selection: TextSelection.collapsed(
+                            offset: formatado.length,
+                          ),
+                        );
+                      }
+                    },
                   ),
                   _buildCampo(
                     'Litros Abastecidos',
                     litrosAbastecidosController,
                     keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      final formatado = _formatarValorPix(value);
+                      if (formatado != litrosAbastecidosController.text) {
+                        litrosAbastecidosController.value = TextEditingValue(
+                          text: formatado,
+                          selection: TextSelection.collapsed(
+                            offset: formatado.length,
+                          ),
+                        );
+                      }
+                    },
                   ),
+
                   _buildCampo('Total (R\$)', totalController, readOnly: true),
 
                   const SizedBox(height: 25),
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 30,
-                            vertical: 15,
-                          ),
-                        ),
-                        onPressed: _isLoading ? null : mandarAbastecimento,
-                        child: const Text(
-                          'Salvar',
-                          style: TextStyle(color: Colors.white),
+                  Center(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 30,
+                          vertical: 15,
                         ),
                       ),
-                    ],
+                      onPressed: _isLoading ? null : mandarAbastecimento,
+                      child: const Text(
+                        'Salvar',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-    );
-  }
-
-  /// 🔹 Campo de texto genérico
-  Widget _buildCampo(
-    String label,
-    TextEditingController controller, {
-    bool readOnly = false,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextField(
-        controller: controller,
-        keyboardType: keyboardType,
-        readOnly: readOnly,
-        style: const TextStyle(color: Colors.white),
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: const TextStyle(color: Colors.white),
-          enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.white24),
-          ),
-          focusedBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.green),
-          ),
-        ),
-      ),
     );
   }
 }

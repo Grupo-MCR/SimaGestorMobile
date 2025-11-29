@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:sima_gestor_app/model/despesas.dart';
 import 'package:sima_gestor_app/model/api_call.dart';
 import 'package:sima_gestor_app/model/veiculo.dart';
@@ -78,6 +79,12 @@ class _InterfaceDespesasState extends State<InterfaceDespesas> {
       }
 
       double valor = double.parse(_valorController.text.replaceAll(',', '.'));
+      
+      // Validar se o valor é positivo
+      if (valor <= 0) {
+        throw Exception('O valor deve ser maior que zero');
+      }
+
       DateTime dataHora = DateFormat('dd/MM/yyyy HH:mm').parse(_dataHoraController.text);
 
       Despesa despesa = Despesa(
@@ -151,6 +158,19 @@ class _InterfaceDespesasState extends State<InterfaceDespesas> {
               surface: Colors.black,
               onSurface: Colors.white,
             ),
+            textTheme: const TextTheme(
+              bodyLarge: TextStyle(color: Colors.white),
+              bodyMedium: TextStyle(color: Colors.white),
+              titleMedium: TextStyle(color: Colors.white),
+              headlineMedium: TextStyle(color: Colors.white),
+              headlineSmall: TextStyle(color: Colors.white),
+              labelLarge: TextStyle(color: Colors.white),
+            ),
+            inputDecorationTheme: const InputDecorationTheme(
+              labelStyle: TextStyle(color: Colors.white),
+              hintStyle: TextStyle(color: Colors.white70),
+            ),
+            dialogBackgroundColor: Colors.black,
           ),
           child: child!,
         );
@@ -170,6 +190,15 @@ class _InterfaceDespesasState extends State<InterfaceDespesas> {
                 surface: Colors.black,
                 onSurface: Colors.white,
               ),
+              textTheme: const TextTheme(
+                bodyLarge: TextStyle(color: Colors.white),
+                bodyMedium: TextStyle(color: Colors.white),
+                titleMedium: TextStyle(color: Colors.white),
+                headlineMedium: TextStyle(color: Colors.white),
+                headlineSmall: TextStyle(color: Colors.white),
+                labelLarge: TextStyle(color: Colors.white),
+              ),
+              dialogBackgroundColor: Colors.black,
             ),
             child: child!,
           );
@@ -185,6 +214,7 @@ class _InterfaceDespesasState extends State<InterfaceDespesas> {
           pickedTime.minute,
         );
         setState(() {
+          // Formato brasileiro: dd/MM/yyyy HH:mm
           _dataHoraController.text =
               "${combined.day.toString().padLeft(2, '0')}/${combined.month.toString().padLeft(2, '0')}/${combined.year} "
               "${pickedTime.hour.toString().padLeft(2, '0')}:${pickedTime.minute.toString().padLeft(2, '0')}";
@@ -262,6 +292,8 @@ class _InterfaceDespesasState extends State<InterfaceDespesas> {
                       decoration: const InputDecoration(
                         labelText: 'Data e Hora',
                         labelStyle: TextStyle(color: Colors.white70),
+                        hintText: 'DD/MM/AAAA HH:MM',
+                        hintStyle: TextStyle(color: Colors.white30),
                         suffixIcon: Icon(
                           Icons.calendar_today,
                           color: Colors.green,
@@ -277,10 +309,29 @@ class _InterfaceDespesasState extends State<InterfaceDespesas> {
                     ),
                   ),
 
-                  _buildCampo(
-                    'Valor (R\$)',
-                    _valorController,
-                    keyboardType: TextInputType.number,
+                  // Campo de valor com validação para apenas números positivos
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: TextField(
+                      controller: _valorController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                      ],
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        labelText: 'Valor (R\$)',
+                        labelStyle: TextStyle(color: Colors.white),
+                        hintText: '0.00',
+                        hintStyle: TextStyle(color: Colors.white30),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white24),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.green),
+                        ),
+                      ),
+                    ),
                   ),
                   
                   _buildCampo('Observação', _observacaoController),
