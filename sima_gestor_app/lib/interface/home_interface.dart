@@ -1,20 +1,26 @@
 import 'package:flutter/material.dart';
-import '../interface/login_interface.dart';
-
-
 import '../model/usuario.dart';
 import 'checklist_interface.dart';
 import '../interface/despesa_interface.dart';
 import '../interface/abastecimento_interface.dart';
-//import '../interfaces/checklist.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   final Usuario usuario;
 
   const HomePage({super.key, required this.usuario});
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context); // IMPORTANTE para AutomaticKeepAliveClientMixin
+    
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
@@ -45,11 +51,7 @@ class HomePage extends StatelessWidget {
                     ),
                     onSelected: (value) {
                       if (value == 1) {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => const LoginPage()),
-                          (route) => false, // remove todas as telas anteriores
-                        );
+                        _handleLogout();
                       }
                     },
                     itemBuilder: (context) => [
@@ -58,8 +60,7 @@ class HomePage extends StatelessWidget {
                         child: SizedBox(
                           width: double.infinity,
                           child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.center, // centraliza
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               const Icon(
                                 Icons.account_circle,
@@ -68,7 +69,7 @@ class HomePage extends StatelessWidget {
                               ),
                               const SizedBox(height: 5),
                               Text(
-                                usuario.getNome() ?? "Usuário",
+                                widget.usuario.getNome() ?? "Usuário",
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   color: Colors.white,
@@ -77,7 +78,7 @@ class HomePage extends StatelessWidget {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                usuario.getEmail() ?? "",
+                                widget.usuario.getEmail() ?? "",
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   color: Colors.white70,
@@ -109,46 +110,19 @@ class HomePage extends StatelessWidget {
                     _buildMenuCard(
                       title: "Abastecimentos",
                       icon: Icons.local_gas_station,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                CadastroManualPage(usuario: usuario),
-                          ),
-                        );
-                      },
+                      onTap: () => _navigateToAbastecimentos(),
                     ),
                     const SizedBox(height: 20),
                     _buildMenuCard(
                       title: "Despesas",
                       icon: Icons.attach_money,
-                      onTap: () {
-                        // CORRIGIDO: Agora passa servidor e token
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => InterfaceDespesas(
-                              servidor: usuario.getServidor() ?? '',
-                              token: usuario.getToken() ?? '',
-                            ),
-                          ),
-                        );
-                      },
+                      onTap: () => _navigateToDespesas(),
                     ),
                     const SizedBox(height: 20),
                     _buildMenuCard(
                       title: "Checklists",
                       icon: Icons.assignment,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                CheckListPage(usuario: usuario),
-                          ),
-                        );
-                      },
+                      onTap: () => _navigateToChecklists(),
                     ),
                   ],
                 ),
@@ -156,6 +130,82 @@ class HomePage extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _navigateToAbastecimentos() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CadastroManualPage(usuario: widget.usuario),
+      ),
+    );
+  }
+
+  void _navigateToDespesas() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => InterfaceDespesas(
+          servidor: widget.usuario.getServidor(),
+          token: widget.usuario.getToken() ?? '',
+        ),
+      ),
+    );
+  }
+
+  void _navigateToChecklists() {
+    
+    try {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CheckListPage(usuario: widget.usuario),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao abrir Checklists: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _handleLogout() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: const Text(
+          'Sair',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: const Text(
+          'Deseja realmente sair?',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Cancelar',
+              style: TextStyle(color: Colors.white70),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Fecha o dialog
+              Navigator.pop(context); // Volta para login
+            },
+            child: const Text(
+              'Sair',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
       ),
     );
   }
