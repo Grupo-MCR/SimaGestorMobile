@@ -78,7 +78,9 @@ class _InterfaceDespesasState extends State<InterfaceDespesas> {
         throw Exception('Por favor, preencha a data e hora');
       }
 
-      double valor = double.parse(_valorController.text.replaceAll(',', '.'));
+      // Converte o valor de centavos para reais
+      String valorTexto = _valorController.text.replaceAll('.', '').replaceAll(',', '');
+      double valor = int.parse(valorTexto) / 100.0;
       
       // Validar se o valor é positivo
       if (valor <= 0) {
@@ -148,7 +150,7 @@ class _InterfaceDespesasState extends State<InterfaceDespesas> {
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      lastDate: DateTime.now(), // Não permite datas futuras
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -213,6 +215,18 @@ class _InterfaceDespesasState extends State<InterfaceDespesas> {
           pickedTime.hour,
           pickedTime.minute,
         );
+        
+        // Verifica se a data/hora combinada não é futura
+        if (combined.isAfter(DateTime.now())) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Não é possível selecionar data e hora futuras'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+        
         setState(() {
           // Formato brasileiro: dd/MM/yyyy HH:mm
           _dataHoraController.text =
@@ -309,20 +323,21 @@ class _InterfaceDespesasState extends State<InterfaceDespesas> {
                     ),
                   ),
 
-                  // Campo de valor com validação para apenas números positivos
+                  // Campo de valor com formatação automática
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: TextField(
                       controller: _valorController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: TextInputType.number,
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                        FilteringTextInputFormatter.digitsOnly,
+                        _CurrencyInputFormatter(),
                       ],
                       style: const TextStyle(color: Colors.white),
                       decoration: const InputDecoration(
                         labelText: 'Valor (R\$)',
                         labelStyle: TextStyle(color: Colors.white),
-                        hintText: '0.00',
+                        hintText: '0,00',
                         hintStyle: TextStyle(color: Colors.white30),
                         enabledBorder: OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.white24),
@@ -451,5 +466,65 @@ class _InterfaceDespesasState extends State<InterfaceDespesas> {
     _dataHoraController.dispose();
     _observacaoController.dispose();
     super.dispose();
+  }
+}
+
+// Formatador de moeda personalizado
+class _CurrencyInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    // Remove tudo que não for dígito
+    String digitsOnly = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
+    
+    if (digitsOnly.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    // Converte para int e formata
+    int value = int.parse(digitsOnly);
+    
+    // Formata como moeda brasileira
+    String formatted = _formatCurrency(value);
+
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+
+  String _formatCurrency(int value) {
+    // Divide por 100 para ter os centavos
+    double realValue = value / 100;
+    
+    // Formata com 2 casas decimais
+    String formatted = realValue.toStringAsFixed(2);
+    
+    // Substitui ponto por vírgula
+    formatted = formatted.replaceAll('.', ',');
+    
+    // Adiciona separador de milhares
+    List<String> parts = formatted.split(',');
+    String integerPart = parts[0];
+    String decimalPart = parts[1];
+    
+    // Adiciona pontos como separadores de milhar
+    String result = '';
+    int count = 0;
+    for (int i = integerPart.length - 1; i >= 0; i--) {
+      if (count > 0 && count % 3 == 0) {
+        result = '.$result';
+      }
+      result = integerPart[i] + result;
+      count++;
+    }
+    
+    return '$result,$decimalPart';
   }
 }
