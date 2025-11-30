@@ -101,14 +101,9 @@ class _CheckListPageState extends State<CheckListPage>
         });
       }
       await prefs.setString('checklist_itens', jsonEncode(itensData));
-      
-      print('💾 Estado salvo!');
-      print('💾 Placa: $_selectedPlaca');
-      print('💾 Motorista: $_selectedMotorista');
-      print('💾 Foto pendente: $_pendingPhotoIndex');
-      print('💾 Itens salvos: ${itensData.length}');
+
     } catch (e) {
-      print('❌ Erro ao salvar estado: $e');
+      print('Erro ao salvar estado: $e');
     }
   }
 
@@ -333,10 +328,10 @@ class _CheckListPageState extends State<CheckListPage>
           _motoristas = response;
           _isLoading = false;
         });
-        print('👤 Motoristas carregados: ${_motoristas.length}');
+        print('Motoristas carregados: ${_motoristas.length}');
       }
     } catch (e) {
-      print("❌ Erro ao carregar motoristas: $e");
+      print("Erro ao carregar motoristas: $e");
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -387,7 +382,7 @@ class _CheckListPageState extends State<CheckListPage>
       await _processarFoto(image, index);
       
     } catch (e, stack) {
-      print('❌ ERRO: $e');
+      print('ERRO: $e');
       print(stack);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -413,7 +408,7 @@ class _CheckListPageState extends State<CheckListPage>
         item.setFoto(null);
         _itens[index] = item;
       });
-      print('✅ Foto salva (Web): ${bytes.length} bytes');
+      print('Foto salva (Web): ${bytes.length} bytes');
     } else {
       final imagePath = image.path;
       
@@ -438,7 +433,7 @@ class _CheckListPageState extends State<CheckListPage>
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('✅ Foto capturada!'),
+          content: Text('Foto capturada!'),
           backgroundColor: Colors.green,
           duration: Duration(seconds: 2),
         ),
@@ -540,7 +535,7 @@ class _CheckListPageState extends State<CheckListPage>
           
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text("✅ Checklist enviado com sucesso!"),
+              content: Text("Checklist enviado com sucesso!"),
               backgroundColor: Colors.green,
               duration: Duration(seconds: 2),
             ),
@@ -555,7 +550,7 @@ class _CheckListPageState extends State<CheckListPage>
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text("❌ Erro ao enviar checklist."),
+              content: Text("Erro ao enviar checklist."),
               backgroundColor: Colors.red,
             ),
           );
@@ -566,7 +561,7 @@ class _CheckListPageState extends State<CheckListPage>
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("❌ Erro: $e"),
+            content: Text("Erro: $e"),
             backgroundColor: Colors.red,
           ),
         );
