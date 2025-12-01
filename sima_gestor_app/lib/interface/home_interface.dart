@@ -92,9 +92,18 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin 
                       const PopupMenuDivider(),
                       const PopupMenuItem(
                         value: 1,
-                        child: Text(
-                          "Sair",
-                          style: TextStyle(color: Colors.white),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Sair",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
