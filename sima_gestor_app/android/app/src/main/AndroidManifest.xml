@@ -6,7 +6,7 @@
         android:name="android.hardware.camera.any"
         android:required="false" />
     <application
-        android:label="sima_gestor_app"
+        android:label="SimaGestor"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
