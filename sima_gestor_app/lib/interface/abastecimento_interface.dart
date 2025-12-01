@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:sima_gestor_app/model/abastecimento.dart';
-import 'package:sima_gestor_app/service/api_service.dart';
-import 'package:sima_gestor_app/model/usuario.dart';
-import 'package:sima_gestor_app/model/veiculo.dart';
-import 'package:sima_gestor_app/service/abastecimento_service.dart';
+import 'package:SimaGestor/model/abastecimento.dart';
+import 'package:SimaGestor/service/api_service.dart';
+import 'package:SimaGestor/model/usuario.dart';
+import 'package:SimaGestor/model/veiculo.dart';
+import 'package:SimaGestor/service/abastecimento_service.dart';
 
 class CadastroManualPage extends StatefulWidget {
   final Usuario usuario;

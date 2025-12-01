@@ -1,5 +1,5 @@
-name: sima_gestor_app
-description: "A new Flutter project."
+name: SimaGestor
+description: "Aplicátivo do SimaGestor para celulares"
 publish_to: 'none'
 version: 0.1.0
 

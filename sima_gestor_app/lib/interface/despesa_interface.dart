@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:sima_gestor_app/model/despesas.dart';
-import 'package:sima_gestor_app/service/api_service.dart';
-import 'package:sima_gestor_app/model/veiculo.dart';
-import 'package:sima_gestor_app/service/despesa_service.dart';
+import 'package:SimaGestor/model/despesas.dart';
+import 'package:SimaGestor/service/api_service.dart';
+import 'package:SimaGestor/model/veiculo.dart';
+import 'package:SimaGestor/service/despesa_service.dart';
 import 'package:intl/intl.dart';
 
 class InterfaceDespesas extends StatefulWidget {

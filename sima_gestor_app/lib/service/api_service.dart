@@ -1,7 +1,7 @@
 import 'package:http/http.dart';
-import 'package:sima_gestor_app/model/item_checklist.dart';
-import 'package:sima_gestor_app/model/usuario.dart';
-import 'package:sima_gestor_app/model/veiculo.dart';
+import 'package:SimaGestor/model/item_checklist.dart';
+import 'package:SimaGestor/model/usuario.dart';
+import 'package:SimaGestor/model/veiculo.dart';
 import '../model/fetch.dart';
 
 class APIService {

@@ -1,5 +1,5 @@
-import 'package:sima_gestor_app/model/abastecimento.dart';
-import 'package:sima_gestor_app/service/api_service.dart';
+import 'package:SimaGestor/model/abastecimento.dart';
+import 'package:SimaGestor/service/api_service.dart';
 
 class AbastecimentoService {
   static Future<String> enviarAbastecimento(

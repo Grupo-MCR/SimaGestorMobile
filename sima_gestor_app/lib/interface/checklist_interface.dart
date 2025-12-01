@@ -6,11 +6,11 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:signature/signature.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sima_gestor_app/service/api_service.dart';
-import 'package:sima_gestor_app/model/item_checklist.dart';
-import 'package:sima_gestor_app/model/usuario.dart';
-import 'package:sima_gestor_app/model/veiculo.dart';
-import 'package:sima_gestor_app/service/checklist_service.dart';
+import 'package:SimaGestor/service/api_service.dart';
+import 'package:SimaGestor/model/item_checklist.dart';
+import 'package:SimaGestor/model/usuario.dart';
+import 'package:SimaGestor/model/veiculo.dart';
+import 'package:SimaGestor/service/checklist_service.dart';
 
 class CheckListPage extends StatefulWidget {
   final Usuario usuario;

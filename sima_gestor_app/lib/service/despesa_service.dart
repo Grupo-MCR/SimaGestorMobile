@@ -1,5 +1,5 @@
-import 'package:sima_gestor_app/model/despesas.dart';
-import 'package:sima_gestor_app/service/api_service.dart';
+import 'package:SimaGestor/model/despesas.dart';
+import 'package:SimaGestor/service/api_service.dart';
 
 class DespesaService {
   static Future<String> enviarDespesa(
