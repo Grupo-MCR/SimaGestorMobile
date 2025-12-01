@@ -3,11 +3,10 @@ import 'dart:io' show File;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:camera/camera.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:signature/signature.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sima_gestor_app/model/api_call.dart';
+import 'package:sima_gestor_app/service/api_service.dart';
 import 'package:sima_gestor_app/model/item_checklist.dart';
 import 'package:sima_gestor_app/model/usuario.dart';
 import 'package:sima_gestor_app/model/veiculo.dart';
@@ -242,6 +241,7 @@ class _CheckListPageState extends State<CheckListPage>
       await prefs.remove('checklist_last_photo_path');
       await prefs.remove('checklist_last_photo_index');
     } catch (e) {
+
     }
   }
 
@@ -266,7 +266,7 @@ class _CheckListPageState extends State<CheckListPage>
     
     setState(() => _isLoading = true);
 
-    final api = APICall(user.getServidor(), user.getToken());
+    final api = APIService(user.getServidor(), user.getToken());
 
     try {
       var response = await api.receberItensChecklist(veiculo.getId() ?? 1);
@@ -289,7 +289,7 @@ class _CheckListPageState extends State<CheckListPage>
     
     setState(() => _isLoading = true);
 
-    final api = APICall(user.getServidor(), user.getToken());
+    final api = APIService(user.getServidor(), user.getToken());
 
     try {
       var response = await api.receberVeiculos();
@@ -317,7 +317,7 @@ class _CheckListPageState extends State<CheckListPage>
       }
     });
 
-    final api = APICall(user.getServidor(), user.getToken());
+    final api = APIService(user.getServidor(), user.getToken());
 
     try {
       await Future.delayed(const Duration(milliseconds: 600));
@@ -512,7 +512,7 @@ class _CheckListPageState extends State<CheckListPage>
       final assinaturaBytes = await _signatureController.toPngBytes();
       final assinaturaBase64 = base64Encode(assinaturaBytes!);
 
-      final api = APICall(widget.usuario.getServidor(), widget.usuario.getToken());
+      final api = APIService(widget.usuario.getServidor(), widget.usuario.getToken());
       final service = ChecklistService(api);
 
       final veiculo = _veiculos.firstWhere((v) => v.getPlaca() == _selectedPlaca);

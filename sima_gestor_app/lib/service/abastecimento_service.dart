@@ -1,5 +1,5 @@
 import 'package:sima_gestor_app/model/abastecimento.dart';
-import 'package:sima_gestor_app/model/api_call.dart';
+import 'package:sima_gestor_app/service/api_service.dart';
 
 class AbastecimentoService {
   static Future<String> enviarAbastecimento(
@@ -10,7 +10,7 @@ class AbastecimentoService {
         throw Exception("Erro: não foi possível realizar conexão com o sistema");
       }
       abastecimento.validarAll();
-      APICall api = APICall(servidor, token);
+      APIService api = APIService(servidor, token);
       try {
         var respostaAPI = await api.enviarAbastecimento(abastecimento.buildAbastecimento());
         return respostaAPI;

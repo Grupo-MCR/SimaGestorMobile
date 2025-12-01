@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sima_gestor_app/model/abastecimento.dart';
-import 'package:sima_gestor_app/model/api_call.dart';
+import 'package:sima_gestor_app/service/api_service.dart';
 import 'package:sima_gestor_app/model/usuario.dart';
 import 'package:sima_gestor_app/model/veiculo.dart';
 import 'package:sima_gestor_app/service/abastecimento_service.dart';
@@ -93,7 +93,7 @@ class _CadastroManualPageState extends State<CadastroManualPage> {
 
   void _loadPlacas(Usuario user) async {
     setState(() => _isLoading = true);
-    final api = APICall(user.getServidor(), user.getToken());
+    final api = APIService(user.getServidor(), user.getToken());
 
     try {
       var response = await api.receberVeiculos();

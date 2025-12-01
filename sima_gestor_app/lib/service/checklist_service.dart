@@ -1,9 +1,9 @@
 import '../model/checklist.dart';
 import '../model/item_checklist.dart';
-import '../model/api_call.dart';
+import 'api_service.dart';
 
 class ChecklistService {
-  final APICall api;
+  final APIService api;
 
   ChecklistService(this.api);
 

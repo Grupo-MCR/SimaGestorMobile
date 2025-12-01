@@ -1,5 +1,5 @@
 import '../model/usuario.dart';
-import '../model/api_call.dart';
+import 'api_service.dart';
 
 class LoginService {
   static Future<Usuario> login(
@@ -15,7 +15,7 @@ class LoginService {
     user.setEmail(email);
     user.setSenha(senha);
 
-    APICall api = APICall(null, null);
+    APIService api = APIService(null, null);
     dynamic r = await api.enviarLogin(user.toJson());
 
     if (r == null) {

@@ -2,14 +2,14 @@ import 'package:http/http.dart';
 import 'package:sima_gestor_app/model/item_checklist.dart';
 import 'package:sima_gestor_app/model/usuario.dart';
 import 'package:sima_gestor_app/model/veiculo.dart';
-import 'fetch.dart';
+import '../model/fetch.dart';
 
-class APICall {
+class APIService {
   String? server;
   String? token;
   Fetch fetch = Fetch();
 
-  APICall(this.server, this.token);
+  APIService(this.server, this.token);
 
   String getServer() {
     return server??'simasat';
@@ -31,21 +31,21 @@ class APICall {
     try {
       setServer(login['servidor']);
       
-      String link = "https://" + getServer() + ".simagestor.com.br/api/api_auth.php/login";
+      String link = "https://" + getServer().trim() + ".simagestor.com.br/api/api_auth.php/login";
       Map<String, dynamic> loginRequest = {};
       loginRequest['username'] = login['email'];
       loginRequest['password'] = login['senha'];
       
       dynamic responseLogin = await fetch.post(link, {}, loginRequest); 
       if(responseLogin == null) {
-        throw new ClientException("erro no request");
+        throw ClientException("erro no request");
       }
 
       dynamic data = responseLogin['data'];
       setToken(data['token']);
       
       dynamic motoristas = await receberMotoristas();
-      String nome = 'unnamed';
+      String nome = 'Motorista';
       if(motoristas != null) {
         for(int i=0; i<motoristas.length ;i++) {
           if(motoristas[i].getId() == data['user_id']) {
@@ -70,8 +70,8 @@ class APICall {
 
   dynamic receberMotoristas() async {
     try {
-      String link = "https://" + getServer() + ".simagestor.com.br/api/api_motoristas.php";
-      Map<String, String> headers = {'Authorization': "Bearer " + getToken()};
+      String link = "https://" + getServer().trim() + ".simagestor.com.br/api/api_motoristas.php";
+      Map<String, String> headers = {'Authorization': "Bearer " + getToken().trim()};
       
       dynamic responseMotoristas = await fetch.get(link, headers);
       List<dynamic> data = responseMotoristas['data'];
@@ -91,8 +91,8 @@ class APICall {
 
   dynamic receberVeiculos() async {
     try {
-      String link = "https://" + getServer() + ".simagestor.com.br/api/api_veiculos.php";
-      Map<String, String> headers = {'Authorization': "Bearer " + getToken()};
+      String link = "https://" + getServer().trim() + ".simagestor.com.br/api/api_veiculos.php";
+      Map<String, String> headers = {'Authorization': "Bearer " + getToken().trim()};
 
       dynamic responseVeiculos = await fetch.get(link, headers);
       List<dynamic> data = responseVeiculos['data'];
@@ -111,30 +111,26 @@ class APICall {
 
   dynamic enviarAbastecimento(Map<String, dynamic> abastecimento) async {
     try {
-      String link = "https://" + getServer() + ".simagestor.com.br/api/api_abastecimento.php";
-      Map<String, String> headers = {'Authorization': "Bearer " + getToken()};      
+      String link = "https://" + getServer().trim() + ".simagestor.com.br/api/api_abastecimento.php";
+      Map<String, String> headers = {'Authorization': "Bearer " + getToken().trim()};      
 
       dynamic responseAbastecimento = await fetch.post(link, headers, abastecimento);
     
       return responseAbastecimento['message'];
     } catch(e) {
-      throw new Exception(e.toString());
+      throw Exception(e.toString());
     }
   }
 
   dynamic enviarDespesa(Map<String, dynamic> despesa) async {
   try {
-    String link = "https://" + getServer() + ".simagestor.com.br/api/api_despesas.php";
-    Map<String, String> headers = {'Authorization': "Bearer " + getToken()};
+    String link = "https://" + getServer().trim() + ".simagestor.com.br/api/api_despesas.php";
+    Map<String, String> headers = {'Authorization': "Bearer " + getToken().trim()};
     Map<String, String> body = {};
     
     despesa.forEach((key, value) {
       body[key] = value.toString();
     });
-
-    print("Link: $link");
-    print("Headers: $headers");
-    print("Body: $body");
 
     dynamic responseDespesa = await fetch.multipartPost(link, headers, body, {}, {});
     
@@ -152,8 +148,8 @@ class APICall {
   // Método para retornar uma lista com os itens de chelist do template do (id)véiculo passado
   dynamic receberItensChecklist(int idVeiculo) async {
     try {
-      String link = "https://" + getServer()+ ".simagestor.com.br/api/api_checklist.php/templates?vehicle_id=" + idVeiculo.toString();
-      Map<String, String> headers = {'Authorization': "Bearer " + getToken()};
+      String link = "https://" + getServer().trim() + ".simagestor.com.br/api/api_checklist.php/templates?vehicle_id=" + idVeiculo.toString();
+      Map<String, String> headers = {'Authorization': "Bearer " + getToken().trim()};
         
       dynamic responseItensChecklist = await fetch.get(link, headers);
       List<dynamic> data = responseItensChecklist['data'];
@@ -172,8 +168,8 @@ class APICall {
 
   dynamic enviarChecklist(Map<String, dynamic> checklist) async {
     try {
-      String link = "https://" + getServer() + ".simagestor.com.br/api/api_checklist";
-      Map<String, String> headers = {'Authorization': "Bearer " + getToken()};
+      String link = "https://" + getServer().trim() + ".simagestor.com.br/api/api_checklist";
+      Map<String, String> headers = {'Authorization': "Bearer " + getToken().trim()};
       Map<String, String> fieldsBody = {};
       Map<String, dynamic> filesBody = {};
       Map<String, Map<String, String>> midiaTypes = {};

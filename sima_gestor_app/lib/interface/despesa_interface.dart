@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sima_gestor_app/model/despesas.dart';
-import 'package:sima_gestor_app/model/api_call.dart';
+import 'package:sima_gestor_app/service/api_service.dart';
 import 'package:sima_gestor_app/model/veiculo.dart';
 import 'package:sima_gestor_app/service/despesa_service.dart';
 import 'package:intl/intl.dart';
@@ -44,7 +44,7 @@ class _InterfaceDespesasState extends State<InterfaceDespesas> {
   void _loadPlacas() async {
     setState(() => _isLoading = true);
 
-    final api = APICall(widget.servidor, widget.token);
+    final api = APIService(widget.servidor, widget.token);
 
     try {
       var response = await api.receberVeiculos();
