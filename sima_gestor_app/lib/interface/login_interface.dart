@@ -111,7 +111,7 @@ class _LoginPageState extends State<LoginPage> {
                       TextField(
                         controller: _urlController,
                         decoration: const InputDecoration(
-                          labelText: "Prefixo - URL",
+                          labelText: "Empresa / Prefixo URL",
                           labelStyle: TextStyle(color: Colors.white70),
                           enabledBorder: OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.white24),
