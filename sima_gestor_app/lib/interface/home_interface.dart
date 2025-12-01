@@ -3,6 +3,7 @@ import '../model/usuario.dart';
 import 'checklist_interface.dart';
 import '../interface/despesa_interface.dart';
 import '../interface/abastecimento_interface.dart';
+import 'login_page.dart';
 
 class HomePage extends StatefulWidget {
   final Usuario usuario;
@@ -207,7 +208,11 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin 
           TextButton(
             onPressed: () {
               Navigator.pop(context); // Fecha o dialog
-              Navigator.pop(context); // Volta para login
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+                (route) => false, // Remove todas as telas anteriores
+              );
             },
             child: const Text(
               'Sair',
