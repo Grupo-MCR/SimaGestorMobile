@@ -1,12 +1,12 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart' as http_parser;
+import 'package:http/http.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 // Classe para fazer as comunicações com a API
 class Fetch {
   // Atributo para fazer as transações com a API
-  var client = http.Client();
+  var client = Client();
 
   // Construtor da classe
   Fetch();
@@ -16,18 +16,23 @@ class Fetch {
     var fetchUrl = Uri.parse(apiLink); // URL da API
     var fetchHeaders = headers; // Headers da requisição
 
-    var response = await client.get(
-      fetchUrl,
-      headers: fetchHeaders,
-    ); // Execução da requisição
-    if (response.statusCode != 200) {
-      print("Código de status da resposta: " + response.statusCode.toString());
-      var error = jsonDecode(response.body);
-      throw Exception(
-        error["message"],
-      ); // Lança erro se a requisição não for bem sucedida :P
+    try {
+      var response = await client.get(
+        fetchUrl,
+        headers: fetchHeaders,
+      ); // Execução da requisição
+      if (response.statusCode != 200) {
+        print("Código de status da resposta: " + response.statusCode.toString());
+        var error = jsonDecode(response.body);
+        throw Exception(
+          error["message"],
+        ); // Lança erro se a requisição não for bem sucedida :P
+      }
+      return jsonDecode(response.body); // Retorno da resposta da requisição
+    } catch(error) {
+      print("Erro no request: " + error.toString());
+      rethrow; // Lança erro se a requisição não for bem sucedida :P
     }
-    return jsonDecode(response.body); // Retorno da resposta da requisição
   }
 
   //Método para fazer um fetch no modo POST
@@ -40,19 +45,23 @@ class Fetch {
     var fetchBody = json.encode(body); // Body da requisição
     var fetchHeaders = headers; // Headers da requisição
 
-    var response = await client.post(
-      fetchUrl,
-      body: fetchBody,
-      headers: fetchHeaders,
-    ); // Execução da requisição
-    if (response.statusCode != 200) {
-      print("Código de status da resposta: " + response.statusCode.toString());
-      var error = jsonDecode(response.body);
-      throw Exception(
-        error["message"],
-      ); // Lança erro se a requisição não for bem sucedida :P
+    try {
+      var response = await client.post(
+        fetchUrl,
+        body: fetchBody,
+        headers: fetchHeaders,
+      ); // Execução da requisição
+      if (response.statusCode != 200) {
+        print("Código de status da resposta: " + response.statusCode.toString());
+        var error = jsonDecode(response.body);
+        print(error["message"]);
+        return null; 
+      }
+      return jsonDecode(response.body); // Retorno da resposta da requisição
+    } catch(error) {
+      print("Erro no request: " + error.toString());
+      rethrow; // Lança erro se a requisição não for bem sucedida :P
     }
-    return jsonDecode(response.body); // Retorno da resposta da requisição
   }
 
   //Método para fazer um fetch do tipo MultipartFormData no modo POST
@@ -64,7 +73,7 @@ class Fetch {
     Map<String, Map<String, String>> mediaTypes,
   ) async {
     var requestUrl = Uri.parse(apiLink); // Link da API
-    var request = http.MultipartRequest(
+    var request = MultipartRequest(
       'POST',
       requestUrl,
     ); // Declaração da requisição
@@ -83,11 +92,11 @@ class Fetch {
     if (kIsWeb) {
       files.forEach(await (key, value) async {
         request.files.add(
-          http.MultipartFile.fromBytes(
+          MultipartFile.fromBytes(
             key,
             value!,
             filename: 'imagem_' + key,
-            contentType: http_parser.MediaType(
+            contentType: MediaType(
               mediaTypes[key]?.keys.first ?? 'image',
               mediaTypes[key]?.values.first ?? '*',
             ),
@@ -97,10 +106,10 @@ class Fetch {
     } else {
       files.forEach(await (key, value) async {
         request.files.add(
-          await http.MultipartFile.fromPath(
+          await MultipartFile.fromPath(
             key,
             value,
-            contentType: http_parser.MediaType(
+            contentType: MediaType(
               mediaTypes[key]?.keys.first ?? 'image',
               mediaTypes[key]?.values.first ?? '*',
             ),
@@ -118,14 +127,13 @@ class Fetch {
     // bloco try realiza a requisição
     try {
       var response = await request.send(); // Manda a requisição
-      print("Código de status da resposta: " + response.statusCode.toString());
+      print("Erro no request: " + response.statusCode.toString());
       var body = await response.stream
           .bytesToString(); // Converte os bytes da resposta para uma string json
       return jsonDecode(body); // Retorna a resposta da requisição como um map
     } catch (e) {
-      throw Exception(
-        e.toString(),
-      ); // Lança erro se a requisição não for bem sucedida :P
+      print(e);
+      rethrow; // Lança erro se a requisição não for bem sucedida :P
     }
   }
 }

@@ -38,7 +38,7 @@ class APIService {
       
       dynamic responseLogin = await fetch.post(link, {}, loginRequest); 
       if(responseLogin == null) {
-        throw ClientException("erro no request");
+        return null;
       }
 
       dynamic data = responseLogin['data'];
@@ -62,9 +62,11 @@ class APIService {
       user['token'] = getToken();
 
       return user;
+    } on ClientException {
+      throw Exception("Erro de conexão com o servidor: indisponível ou sem internet");    
     } catch(e) {
       print(e.toString());
-      return null;
+      throw Exception(e.toString().replaceAll("Exception: ", ""));
     }
   }
 
@@ -83,9 +85,11 @@ class APIService {
       });
       
       return motoristas;
+    } on ClientException {
+      throw Exception("Erro de conexão com o servidor: indisponível ou sem internet");    
     } catch(e) {
       print(e.toString());
-      return null;
+      throw Exception(e.toString().replaceAll("Exception: ", ""));
     }
   }
 
@@ -103,9 +107,11 @@ class APIService {
       });
 
       return veiculos;
+    } on ClientException {
+      throw Exception("Erro de conexão com o servidor: indisponível ou sem internet");    
     } catch(e) {
       print(e.toString());
-      return null;
+      throw Exception(e.toString().replaceAll("Exception: ", ""));
     }
   }
 
@@ -117,8 +123,11 @@ class APIService {
       dynamic responseAbastecimento = await fetch.post(link, headers, abastecimento);
     
       return responseAbastecimento['message'];
+    } on ClientException {
+      throw Exception("Erro de conexão com o servidor: indisponível ou sem internet");    
     } catch(e) {
-      throw Exception(e.toString());
+      print(e.toString());
+      throw Exception(e.toString().replaceAll("Exception: ", ""));
     }
   }
 
@@ -139,10 +148,12 @@ class APIService {
     }
     
     return responseDespesa['message'];
-  } catch(e) {
-    print("Erro completo: $e");
-    throw Exception(e.toString());
-  }
+  } on ClientException {
+      throw Exception("Erro de conexão com o servidor: indisponível ou sem internet");    
+    } catch(e) {
+      print(e.toString());
+      throw Exception(e.toString().replaceAll("Exception: ", ""));
+    }
 }
 
   // Método para retornar uma lista com os itens de chelist do template do (id)véiculo passado
@@ -160,9 +171,11 @@ class APIService {
       });
 
       return itens;   
+    } on ClientException {
+      throw Exception("Erro de conexão com o servidor: indisponível ou sem internet");    
     } catch(e) {
       print(e.toString());
-      return null;
+      throw Exception(e.toString().replaceAll("Exception: ", ""));
     }
   }
 
@@ -185,10 +198,11 @@ class APIService {
       dynamic responseChecklist = await fetch.multipartPost(link, headers, fieldsBody, filesBody, midiaTypes);
 
       return responseChecklist['message'];
+    } on ClientException {
+      throw Exception("Erro de conexão com o servidor: indisponível ou sem internet");    
     } catch(e) {
       print(e.toString());
-      return null;
+      throw Exception(e.toString().replaceAll("Exception: ", ""));
     }
   }
-
 }

@@ -276,11 +276,15 @@ class _CheckListPageState extends State<CheckListPage>
           _isLoading = false;
         });
       }
-    } catch (e, stack) {
-      print(stack);
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceAll(RegExp('Exception: '), '')),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
@@ -299,11 +303,15 @@ class _CheckListPageState extends State<CheckListPage>
           _isLoading = false;
         });
       }
-    } catch (e, stack) {
-      print(stack);
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceAll(RegExp('Exception: '), '')),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
@@ -331,10 +339,14 @@ class _CheckListPageState extends State<CheckListPage>
         print('Motoristas carregados: ${_motoristas.length}');
       }
     } catch (e) {
-      print("Erro ao carregar motoristas: $e");
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceAll(RegExp('Exception: '), '')),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 

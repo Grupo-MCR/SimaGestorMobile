@@ -53,9 +53,14 @@ class _InterfaceDespesasState extends State<InterfaceDespesas> {
         _veiculos = response;
         _isLoading = false;
       });
-    } catch (e, stack) {
-      print('Erro ao carregar placas: $e');
-      print(stack);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceAll(RegExp('Exception: '), '')),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
       setState(() => _isLoading = false);
     }
   }

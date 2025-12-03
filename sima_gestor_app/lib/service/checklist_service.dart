@@ -47,7 +47,7 @@ class ChecklistService {
       return true;
     } catch (e) {
       print('Erro ao enviar checklist: $e');
-      return false;
+      rethrow;
     }
   }
 
@@ -70,8 +70,7 @@ class ChecklistService {
 
       return await enviarChecklist(checklist);
     } catch (e) {
-      print('Erro ao processar checklist: $e');
-      return false;
+      rethrow;
     }
   }
 }
