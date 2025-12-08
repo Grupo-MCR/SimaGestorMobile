@@ -55,11 +55,10 @@ class Fetch {
         print("Código de status da resposta: " + response.statusCode.toString());
         var error = jsonDecode(response.body);
         print(error["message"]);
-        return null; 
+        throw Exception(error["message"]);
       }
       return jsonDecode(response.body); // Retorno da resposta da requisição
     } catch(error) {
-      print("Erro no request: " + error.toString());
       rethrow; // Lança erro se a requisição não for bem sucedida :P
     }
   }

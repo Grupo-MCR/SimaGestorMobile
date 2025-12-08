@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'home_interface.dart';
 import '../service/login_service.dart';
 
@@ -13,6 +14,11 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _urlController = TextEditingController();
   final TextEditingController _senhaController = TextEditingController();
+
+  //final TextEditingController emailborder = TextEditingController(text: "true"); 
+  Color _borderEmail = Colors.white24;
+  Color _borderUrl = Colors.white24;
+  Color _borderSenha = Colors.white24;
 
   bool _loading = false;
 
@@ -33,21 +39,52 @@ class _LoginPageState extends State<LoginPage> {
           builder: (context) => HomePage(usuario: logged),
         ),
       );
-    } catch (e) {
-      // se deu erro -> mostra snackbar
+    } on ClientException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.toString()),
+          content: Text(e.toString().replaceAll("ClientException: ", "")),
           backgroundColor: Colors.red,
         ),
       );
+      _borderEmail = Colors.white24;
+      _borderSenha = Colors.white24;
+      _borderUrl = Colors.red;
+    } on Exception catch (e) {
+      // se deu erro -> mostra snackbar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceAll("Exception: ", "")),
+          backgroundColor: Colors.red,
+        ),
+      );
+      _borderUrl = Colors.white24;
+      _borderEmail = Colors.red;
+      _borderSenha = Colors.red;
     } finally {
       setState(() => _loading = false);
     }
   }
 
+  void rebuild() {
+    setState(() => _loading = true);
+    setState(() => _loading = false);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _urlController.addListener(rebuild);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _urlController.removeListener(rebuild);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final String prefixoUrl = _urlController.text.trim()==""?"":_urlController.text.trim() + ".";
     return Scaffold(
       backgroundColor: Colors.black,
       body: Center(
@@ -93,11 +130,11 @@ class _LoginPageState extends State<LoginPage> {
                       // Email
                       TextField(
                         controller: _emailController,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: "Email",
                           labelStyle: TextStyle(color: Colors.white70),
                           enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white24),
+                            borderSide: BorderSide(color: _borderEmail),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.green),
@@ -110,11 +147,11 @@ class _LoginPageState extends State<LoginPage> {
                       // Prefixo - URL
                       TextField(
                         controller: _urlController,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: "Empresa / Prefixo URL",
                           labelStyle: TextStyle(color: Colors.white70),
                           enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white24),
+                            borderSide: BorderSide(color: _borderUrl),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.green),
@@ -128,11 +165,11 @@ class _LoginPageState extends State<LoginPage> {
                       TextField(
                         controller: _senhaController,
                         obscureText: true,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: "Senha",
                           labelStyle: TextStyle(color: Colors.white70),
                           enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white24),
+                            borderSide: BorderSide(color: _borderSenha),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.green),
@@ -172,13 +209,13 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 40),
 
               // Rodapé
-              const Text.rich(
+              Text.rich(
                 TextSpan(
-                  text: "From ",
+                  text: "Entrando em ",
                   style: TextStyle(color: Colors.white70),
                   children: [
                     TextSpan(
-                      text: "simagestor.com.br",
+                      text: prefixoUrl + "simagestor.com.br",
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,

@@ -63,9 +63,8 @@ class APIService {
 
       return user;
     } on ClientException {
-      throw Exception("Erro de conexão com o servidor: indisponível ou sem internet");    
+      throw ClientException("Erro de conexão com o servidor: prefixo incorreto ou sem internet");    
     } catch(e) {
-      print(e.toString());
       throw Exception(e.toString().replaceAll("Exception: ", ""));
     }
   }
